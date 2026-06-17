@@ -1,0 +1,319 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model activity_feed {
+  id          Int                @id(map: "activity_feed_pk") @default(autoincrement())
+  actor_id    Int
+  type        activity_feed_type
+  entity_type String             @db.VarChar(255)
+  entity_id   Int
+  created_at  DateTime           @default(now()) @db.Timestamptz(6)
+  users       users              @relation(fields: [actor_id], references: [id], onDelete: Cascade, map: "activity_feed_users_id_fk")
+
+  @@index([actor_id, created_at(sort: Desc)], map: "activity_feed_actor_id_created_at_index")
+  @@index([created_at(sort: Desc)], map: "activity_feed_created_at_index")
+}
+
+model albums {
+  id           Int        @id(map: "albums_pk") @default(autoincrement())
+  artist_id    Int
+  title        String     @db.VarChar(255)
+  cover_url    String     @default("default_cover.png") @db.VarChar(255)
+  release_year Int
+  type         album_type @default(single)
+  created_at   DateTime   @default(now()) @db.Timestamptz(6)
+  artists      artists    @relation(fields: [artist_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "albums_artists_id_fk")
+  tracks       tracks[]
+
+  @@index([artist_id, release_year(sort: Desc)], map: "albums_artist_id_release_year_index")
+}
+
+model artists {
+  id                   Int                    @id(map: "artists_pk") @default(autoincrement())
+  name                 String                 @db.VarChar(255)
+  bio                  String?
+  avatar_url           String                 @default("default_avatar.png") @db.VarChar(255)
+  country              String?                @db.VarChar(255)
+  created_at           DateTime               @default(now()) @db.Timestamptz(6)
+  albums               albums[]
+  tracks               tracks[]
+  user_follows_artists user_follows_artists[]
+
+  @@index([name], map: "artists_name_index")
+}
+
+model genres {
+  id          Int      @id(map: "genres_pk") @default(autoincrement())
+  name        String   @unique(map: "genres_uk_name") @db.VarChar(255)
+  slug        String   @unique(map: "genres_slug_uindex") @db.VarChar(255)
+  description String
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model playlist_follows {
+  user_id     Int
+  playlist_id Int
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  playlists   playlists @relation(fields: [playlist_id], references: [id], onDelete: Cascade, map: "playlist_follows_playlists_id_fk")
+  users       users     @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "playlist_follows_users_id_fk")
+
+  @@id([user_id, playlist_id], map: "playlist_follows_pk")
+  @@index([playlist_id], map: "playlist_follows_playlist_id_index")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model playlist_tracks {
+  playlist_id Int
+  track_id    Int
+  position    Int
+  added_at    DateTime  @default(now()) @db.Timestamptz(6)
+  playlists   playlists @relation(fields: [playlist_id], references: [id], onDelete: Cascade, map: "playlist_tracks___fk")
+  tracks      tracks    @relation(fields: [track_id], references: [id], onDelete: Cascade, map: "playlist_tracks_tracks_id_fk")
+
+  @@id([playlist_id, track_id], map: "playlist_tracks_pk")
+  @@index([playlist_id, position], map: "playlist_tracks_playlist_id_position_index")
+}
+
+model playlists {
+  id               Int                @id(map: "playlists_pk") @default(autoincrement())
+  user_id          Int
+  title            String             @db.VarChar(255)
+  description      String             @default("")
+  cover_url        String             @default("default_cover_url.png") @db.VarChar(255)
+  is_public        Boolean            @default(false)
+  created_at       DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime           @default(now()) @db.Timestamptz(6)
+  playlist_follows playlist_follows[]
+  playlist_tracks  playlist_tracks[]
+  users            users              @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "playlists_users_id_fk")
+
+  @@index([user_id], map: "playlists_user_id_index")
+}
+
+model refresh_tokens {
+  id         Int       @id(map: "refresh_tokens_pk") @default(autoincrement())
+  user_id    Int
+  token_hash String
+  expires_at DateTime  @default(dbgenerated("(now() + '7 days'::interval)")) @db.Timestamptz(6)
+  revoked_at DateTime? @db.Timestamptz(6)
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+}
+
+model review_likes {
+  user_id    Int
+  review_id  Int
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  reviews    reviews  @relation(fields: [review_id], references: [id], onDelete: Cascade, map: "review_likes_reviews_id_fk")
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "review_likes_users_id_fk")
+
+  @@id([user_id, review_id], map: "review_likes_pk")
+  @@index([review_id], map: "review_likes_review_id_index")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model reviews {
+  id           Int            @id(map: "reviews_pk") @default(autoincrement())
+  user_id      Int
+  track_id     Int
+  rating       Int
+  body         String         @default("")
+  created_at   DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime       @default(now()) @db.Timestamptz(6)
+  review_likes review_likes[]
+  tracks       tracks         @relation(fields: [track_id], references: [id], onDelete: Cascade, map: "reviews_tracks_id_fk")
+  users        users          @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "reviews_users_id_fk")
+
+  @@unique([user_id, track_id], map: "reviews_uk")
+  @@index([track_id, created_at(sort: Desc)], map: "reviews_track_id_created_at_index")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model room_messages {
+  id         Int      @id(map: "room_messages_pk") @default(autoincrement())
+  room_id    Int
+  user_id    Int
+  body       String
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  rooms      rooms    @relation(fields: [room_id], references: [id], onDelete: Cascade, map: "room_messages_rooms_id_fk")
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "room_messages_users_id_fk")
+
+  @@index([room_id, created_at(sort: Desc)], map: "room_messages_room_id_created_at_index")
+}
+
+model room_participants {
+  room_id   Int
+  user_id   Int
+  role      room_participant_role @default(listener)
+  joined_at DateTime              @default(now()) @db.Timestamptz(6)
+  left_at   DateTime?             @db.Timestamptz(6)
+  rooms     rooms                 @relation(fields: [room_id], references: [id], onDelete: Cascade, map: "room_participants_rooms_id_fk")
+  users     users                 @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "room_participants_users_id_fk")
+
+  @@id([room_id, user_id], map: "room_participants_pk")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model room_queue {
+  id         Int          @id(map: "room_queue_pk") @default(autoincrement())
+  room_id    Int
+  track_id   Int
+  added_by   Int
+  position   Int
+  played_at  DateTime?    @db.Timestamptz(6)
+  skipped_at DateTime?    @db.Timestamptz(6)
+  rooms      rooms        @relation(fields: [room_id], references: [id], onDelete: Cascade, map: "room_queue_rooms_id_fk")
+  tracks     tracks       @relation(fields: [track_id], references: [id], onDelete: Cascade, map: "room_queue_tracks_id_fk")
+  users      users        @relation(fields: [added_by], references: [id], onDelete: Cascade, map: "room_queue_users_id_fk")
+  room_votes room_votes[]
+}
+
+model room_votes {
+  room_id    Int
+  queue_id   Int
+  user_id    Int
+  vote       room_vote_type @default(keep)
+  created_at DateTime       @default(now()) @db.Timestamptz(6)
+  room_queue room_queue     @relation(fields: [queue_id], references: [id], onDelete: Cascade, map: "room_votes_room_queue_id_fk")
+  rooms      rooms          @relation(fields: [room_id], references: [id], onDelete: Cascade, map: "room_votes_rooms_id_fk")
+  users      users          @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "room_votes_users_id_fk")
+
+  @@id([room_id, user_id, queue_id], map: "room_votes_pk")
+  @@index([queue_id], map: "room_votes_queue_id_index")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model rooms {
+  id                Int                 @id(map: "rooms_pk") @default(autoincrement())
+  host_id           Int
+  title             String              @db.VarChar(255)
+  description       String              @default("")
+  is_active         Boolean             @default(true)
+  max_participants  Int
+  created_at        DateTime            @default(now()) @db.Timestamptz(6)
+  closed_at         DateTime?           @db.Timestamptz(6)
+  room_messages     room_messages[]
+  room_participants room_participants[]
+  room_queue        room_queue[]
+  room_votes        room_votes[]
+  users             users               @relation(fields: [host_id], references: [id], onDelete: Cascade, map: "rooms_users_id_fk")
+
+  @@index([created_at(sort: Desc)], map: "rooms_created_at_index", where: raw("(is_active = true)"))
+}
+
+model track_likes {
+  user_id    Int
+  track_id   Int
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  tracks     tracks   @relation(fields: [track_id], references: [id], onDelete: Cascade, map: "track_likes_tracks_id_fk")
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "track_likes_users_id_fk")
+
+  @@id([user_id, track_id], map: "track_likes_pk")
+  @@index([track_id], map: "track_likes_track_id_index")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model tracks {
+  id               Int               @id(map: "tracks_pk") @default(autoincrement())
+  album_id         Int
+  artist_id        Int
+  title            String            @default("unknown title") @db.VarChar(255)
+  duration_seconds Int
+  genre            String            @db.VarChar(255)
+  bpm              Int
+  audio_url        String            @db.VarChar(255)
+  play_count       Int               @default(0)
+  created_at       DateTime          @default(now()) @db.Timestamptz(6)
+  playlist_tracks  playlist_tracks[]
+  reviews          reviews[]
+  room_queue       room_queue[]
+  track_likes      track_likes[]
+  albums           albums            @relation(fields: [album_id], references: [id], onDelete: Cascade, map: "tracks_albums_id_fk")
+  artists          artists           @relation(fields: [artist_id], references: [id], onDelete: Cascade, map: "tracks_artists_id_fk")
+
+  @@index([album_id], map: "tracks_album_id_index")
+  @@index([title], map: "tracks_title_index")
+}
+
+model user_follows {
+  follower_id                            Int
+  following_id                           Int
+  created_at                             DateTime @default(now()) @db.Timestamptz(6)
+  users_user_follows_follower_idTousers  users    @relation("user_follows_follower_idTousers", fields: [follower_id], references: [id], onDelete: Cascade, map: "user_follows_users_id_fk")
+  users_user_follows_following_idTousers users    @relation("user_follows_following_idTousers", fields: [following_id], references: [id], onDelete: Cascade, map: "user_follows_users_id_fk_2")
+
+  @@id([follower_id, following_id], map: "user_follows_pk")
+}
+
+model user_follows_artists {
+  user_id    Int
+  artist_id  Int
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  artists    artists  @relation(fields: [artist_id], references: [id], onDelete: Cascade, map: "user_follows_artists_artists_id_fk")
+
+  @@id([user_id, artist_id], map: "user_follows_artists_pk")
+  @@index([artist_id], map: "user_follows_artists_artist_id_index")
+}
+
+model users {
+  id                                            Int                 @id(map: "users_pk_id") @default(autoincrement())
+  username                                      String              @unique(map: "users_uk_username") @db.VarChar(255)
+  email                                         String              @unique(map: "users_uk_email") @db.VarChar(255)
+  password_hash                                 String              @db.VarChar(255)
+  avatar_url                                    String              @default("default_avatar.png") @db.VarChar(255)
+  bio                                           String?
+  role                                          user_role           @default(listener)
+  created_at                                    DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at                                    DateTime            @default(now()) @db.Timestamptz(6)
+  is_verified                                   Boolean             @default(false)
+  activity_feed                                 activity_feed[]
+  playlist_follows                              playlist_follows[]
+  playlists                                     playlists[]
+  review_likes                                  review_likes[]
+  reviews                                       reviews[]
+  room_messages                                 room_messages[]
+  room_participants                             room_participants[]
+  room_queue                                    room_queue[]
+  room_votes                                    room_votes[]
+  rooms                                         rooms[]
+  track_likes                                   track_likes[]
+  user_follows_user_follows_follower_idTousers  user_follows[]      @relation("user_follows_follower_idTousers")
+  user_follows_user_follows_following_idTousers user_follows[]      @relation("user_follows_following_idTousers")
+}
+
+enum activity_feed_type {
+  track_liked
+  review_posted
+  playlist_updated
+  user_followed
+  artist_followed
+}
+
+enum album_type {
+  album
+  single
+  ep
+}
+
+enum room_participant_role {
+  host
+  co_host
+  listener
+}
+
+enum room_vote_type {
+  skip
+  keep
+}
+
+enum user_role {
+  listener
+  moderator
+  admin
+}

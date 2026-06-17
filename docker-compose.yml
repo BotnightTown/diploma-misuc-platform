@@ -1,0 +1,63 @@
+services:
+  postgres_db:
+    image: postgres:16-alpine
+    container_name: music_platform_db
+    environment:
+      POSTGRES_USER: my_user
+      POSTGRES_PASSWORD: my_password
+      POSTGRES_DB: diploma_music
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - music_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U my_user -d diploma_music"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis_cache:
+    image: redis:7-alpine
+    container_name: music_platform_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    networks:
+      - music_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  fastify_api:
+    build: .
+    container_name: music_platform_api
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://my_user:my_password@postgres_db:5432/diploma_music
+      REDIS_URL: redis://redis_cache:6379
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      NODE_ENV: production
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+      redis_cache:
+        condition: service_healthy
+    networks:
+      - music_network
+
+volumes:
+  pgdata:
+  redisdata:
+
+networks:
+  music_network:
+    driver: bridge
