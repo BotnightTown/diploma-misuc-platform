@@ -6,20 +6,17 @@ import cookie from "@fastify/cookie";
 import { env } from "./config/env.ts";
 import { db } from "./config/db.ts";
 import { redis } from "./config/redis.ts";
+import { apiRoutes } from "./routes.ts";
 
 const app = Fastify({
   logger: env.NODE_ENV === "development",
 });
 
-// Плагіни
 await app.register(cors, { origin: true });
 await app.register(helmet);
 await app.register(cookie);
+await app.register(apiRoutes, { prefix: "/api" });
 
-// Health check
-app.get("/health", async () => ({ status: "ok" }));
-
-// Запуск
 const start = async () => {
   try {
     await redis.connect();
