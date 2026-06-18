@@ -6,11 +6,11 @@ export const createUserSchema = z.object({
   password: z
     .string()
     .min(8, { message: "Password must be at least 8 characters long" })
-    .regex(/[A-Za-zА-Яа-яЁёҐґЄєІіЇї]/, {
+    .regex(/^(?=.*[a-zA-Z]).+$/, {
       message: "Password must contain at least one letter",
     })
     .regex(/\d/, { message: "Password must contain at least one number" })
-    .regex(/[^A-Za-zА-Яа-яЁёҐґЄєІіЇї\d\s]/, {
+    .regex(/^(?=.*[!@#$%^&*(),.?":{}|<>]).+$/, {
       message: "Password must contain at least one special character",
     }),
   bio: z.string().min(1, { message: "Biography cannot be empty" }),
