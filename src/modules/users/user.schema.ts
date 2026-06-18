@@ -1,11 +1,11 @@
-import { email, z } from "zod";
+import { z } from "zod";
 
 export const updateUsernameSchema = z.object({
   username: z.string().min(1, { message: "Username cannot be empty" }),
 });
 
 export const updateBioSchema = z.object({
-  bio: z.string().nullable().optional(),
+  bio: z.string().nullable(),
 });
 
 export const changePasswordSchema = z.object({

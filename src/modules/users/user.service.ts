@@ -12,6 +12,19 @@ import { ProblemDocument } from "../../models/error.model.ts";
 export class UserService {
   constructor(private repository: UserRepository) {}
 
+  async getUserInfo(userId: number): Promise<UserType | null> {
+    const user = await this.repository.findById(userId);
+    if (!user) {
+      throw new ProblemDocument(
+        404,
+        "User Not Found",
+        `User with ID ${userId} does not exist`,
+      );
+    }
+    const { password_hash, ...publicUser } = user;
+    return publicUser ? (publicUser as UserType) : null;
+  }
+
   async updateUsername(
     userId: number,
     data: UpdateUsernameType,
@@ -88,7 +101,7 @@ export class UserService {
   async changePassword(
     userId: number,
     data: ChangePasswordType,
-  ): Promise<UserType | null> {
+  ): Promise<void> {
     const user = await this.repository.findById(userId);
     if (!user) {
       throw new ProblemDocument(
@@ -118,13 +131,20 @@ export class UserService {
       );
     }
 
-    const saltRounds = 10;
-    const passwordHash = await bcrypt.hash(data.new_password, saltRounds);
+    const passwordHash = await bcrypt.hash(data.new_password, 10);
+    await this.repository.update(userId, { password_hash: passwordHash });
+  }
 
-    const newUserPassword = await this.repository.update(userId, {
-      password_hash: passwordHash,
-    });
+  async deleteUser(userId: number): Promise<void> {
+    const user = await this.repository.findById(userId);
+    if (!user) {
+      throw new ProblemDocument(
+        404,
+        "User Not Found",
+        `User with ID ${userId} does not exist`,
+      );
+    }
 
-    return newUserPassword ? (newUserPassword as UserType) : null;
+    await this.repository.delete(userId);
   }
 }

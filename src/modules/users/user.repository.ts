@@ -25,4 +25,8 @@ export class UserRepository {
   async update(id: number, data: UpdatePayload): Promise<UserType> {
     return db.users.update({ where: { id }, data });
   }
+
+  async delete(id: number): Promise<void> {
+    await db.users.delete({ where: { id } });
+  }
 }

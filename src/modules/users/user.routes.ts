@@ -8,8 +8,16 @@ export const userRoutes = async (fastify: FastifyInstance) => {
   const service = new UserService(repository);
   const controller = new UserController(service);
 
+  fastify.get("/user/:userId", controller.getUserInfo.bind(controller));
   fastify.patch(
-    "/user/username/:userId",
+    "/user/:userId/username",
     controller.updateUsername.bind(controller),
   );
+  fastify.patch("/user/:userId/bio", controller.updateBio.bind(controller));
+  fastify.patch("/user/:userId/email", controller.changeEmail.bind(controller));
+  fastify.patch(
+    "/user/:userId/password",
+    controller.changePassword.bind(controller),
+  );
+  fastify.delete("/user/:userId", controller.deleteUser.bind(controller));
 };
