@@ -1,4 +1,4 @@
-import { UserType } from "../../types/user.types.ts";
+import { PublicUser, UserType } from "../../types/user.types.ts";
 import { AuthRepository } from "./auth.repository.ts";
 import { CreateUserType, LoginUserType } from "./auth.schema.ts";
 import { ProblemDocument } from "../../models/error.model.ts";
@@ -43,7 +43,7 @@ export class AuthService {
     return publicUser as UserType;
   }
 
-  async loginUser(data: LoginUserType): Promise<AuthTokens> {
+  async loginUser(data: LoginUserType): Promise<AuthTokens & { user: PublicUser }> {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isEmail = emailRegex.test(data.identifier);
     const user = isEmail
@@ -51,23 +51,12 @@ export class AuthService {
       : await this.repository.findByUsername(data.identifier);
 
     if (!user) {
-      throw new ProblemDocument(
-        401,
-        "Invalid Credentials",
-        "Invalid email/username or password",
-      );
+      throw new ProblemDocument(401, "Invalid Credentials", "Invalid email/username or password");
     }
 
-    const isPasswordValid = await bcrypt.compare(
-      data.password,
-      user.password_hash,
-    );
+    const isPasswordValid = await bcrypt.compare(data.password, user.password_hash);
     if (!isPasswordValid) {
-      throw new ProblemDocument(
-        401,
-        "Invalid Credentials",
-        "Invalid email/username or password",
-      );
+      throw new ProblemDocument(401, "Invalid Credentials", "Invalid email/username or password");
     }
 
     const accessToken = generateAccessToken(user.id);
@@ -75,8 +64,12 @@ export class AuthService {
     const refreshTokenHash = hashToken(refreshToken);
 
     await this.repository.createRefreshToken(user.id, refreshTokenHash);
-
-    return { access_token: accessToken, refresh_token: refreshToken };
+    const { password_hash, bio, role, created_at, updated_at, is_verified, ...publicUser } = user;
+    return {
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      user: publicUser as PublicUser,
+    };
   }
 
   async refreshTokens(rawRefreshToken: string): Promise<AuthTokens> {
@@ -84,40 +77,26 @@ export class AuthService {
     try {
       payload = verifyRefreshToken(rawRefreshToken);
     } catch {
-      throw new ProblemDocument(
-        401,
-        "Invalid Token",
-        "Refresh token is invalid or expired",
-      );
+      throw new ProblemDocument(401, "Invalid Token", "Refresh token is invalid or expired");
     }
 
     const tokenHash = hashToken(rawRefreshToken);
     const storedToken = await this.repository.findRefreshToken(tokenHash);
 
     if (!storedToken || storedToken.expires_at < new Date()) {
-      throw new ProblemDocument(
-        401,
-        "Invalid Token",
-        "Refresh token is invalid or revoked",
-      );
+      throw new ProblemDocument(401, "Invalid Token", "Refresh token is invalid or revoked");
     }
 
     await this.repository.revokeRefreshToken(tokenHash);
 
     const newAccessToken = generateAccessToken(payload.sub);
     const newRefreshToken = generateRefreshToken(payload.sub);
-    await this.repository.createRefreshToken(
-      payload.sub,
-      hashToken(newRefreshToken),
-    );
+    await this.repository.createRefreshToken(payload.sub, hashToken(newRefreshToken));
 
     return { access_token: newAccessToken, refresh_token: newRefreshToken };
   }
 
-  async logoutUser(
-    rawRefreshToken: string,
-    rawAccessToken: string,
-  ): Promise<void> {
+  async logoutUser(rawRefreshToken: string, rawAccessToken: string): Promise<void> {
     const tokenHash = hashToken(rawRefreshToken);
     const storedToken = await this.repository.findRefreshToken(tokenHash);
 
@@ -133,11 +112,7 @@ export class AuthService {
     try {
       accessPayload = verifyAccessToken(rawAccessToken);
     } catch {
-      throw new ProblemDocument(
-        401,
-        "Invalid Token",
-        "Access token is invalid or expired",
-      );
+      throw new ProblemDocument(401, "Invalid Token", "Access token is invalid or expired");
     }
 
     await this.repository.revokeRefreshToken(tokenHash);

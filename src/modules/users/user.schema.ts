@@ -23,9 +23,7 @@ export const changePasswordSchema = z.object({
 });
 
 export const changeEmailSchema = z.object({
-  password: z
-    .string()
-    .min(1, { message: "Password is required to change email" }),
+  password: z.string().min(1, { message: "Password is required to change email" }),
   new_email: z.email({ message: "Invalid email format" }),
 });
 

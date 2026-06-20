@@ -11,17 +11,19 @@ import {
   UpdateUsernameType,
 } from "./user.schema.ts";
 import { parseBody, parseUserId } from "../../utils/controller.utils.ts";
+import {
+  createHateoasResponse,
+  userMutationLinks,
+  userProfileLinks,
+} from "../../utils/hateoas.utils.ts";
 
 export class UserController {
   constructor(private service: UserService) {}
 
-  async getUserInfo(
-    request: FastifyRequest<{ Params: { userId: number } }>,
-    reply: FastifyReply,
-  ) {
+  async getUserInfo(request: FastifyRequest<{ Params: { userId: number } }>, reply: FastifyReply) {
     const userId = parseUserId(request.params.userId);
     const userInfo = await this.service.getUserInfo(userId);
-    return reply.status(200).send({ data: userInfo });
+    return reply.status(200).send(createHateoasResponse(userInfo, userProfileLinks(userId)));
   }
 
   async updateUsername(
@@ -34,9 +36,7 @@ export class UserController {
     const userId = parseUserId(request.params.userId);
     const data = parseBody(updateUsernameSchema, request.body);
     const updatedUser = await this.service.updateUsername(userId, data);
-    return reply
-      .status(200)
-      .send({ message: "Successfully updated", data: updatedUser });
+    return reply.status(200).send(createHateoasResponse(updatedUser, userMutationLinks(userId)));
   }
 
   async updateBio(
@@ -49,9 +49,7 @@ export class UserController {
     const userId = parseUserId(request.params.userId);
     const data = parseBody(updateBioSchema, request.body);
     const updatedBio = await this.service.updateBio(userId, data);
-    return reply
-      .status(200)
-      .send({ message: "Successfully updated", data: updatedBio });
+    return reply.status(200).send(createHateoasResponse(updatedBio, userMutationLinks(userId)));
   }
 
   async changeEmail(
@@ -65,9 +63,7 @@ export class UserController {
     const data = parseBody(changeEmailSchema, request.body);
 
     const updatedUser = await this.service.changeEmail(userId, data);
-    return reply
-      .status(200)
-      .send({ message: "Email successfully changed", data: updatedUser });
+    return reply.status(200).send(createHateoasResponse(updatedUser, userMutationLinks(userId)));
   }
 
   async changePassword(
@@ -84,10 +80,7 @@ export class UserController {
     return reply.status(204).send();
   }
 
-  async deleteUser(
-    request: FastifyRequest<{ Params: { userId: number } }>,
-    reply: FastifyReply,
-  ) {
+  async deleteUser(request: FastifyRequest<{ Params: { userId: number } }>, reply: FastifyReply) {
     const userId = parseUserId(request.params.userId);
     await this.service.deleteUser(userId);
     return reply.status(204).send();

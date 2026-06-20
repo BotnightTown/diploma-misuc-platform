@@ -1,0 +1,9 @@
+node_modules
+.next
+dist
+build
+coverage
+.lucia
+prisma/migrations
+*.log
+**/generated/prisma/**

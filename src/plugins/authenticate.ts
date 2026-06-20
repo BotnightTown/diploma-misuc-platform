@@ -10,18 +10,11 @@ declare module "fastify" {
   }
 }
 
-export async function authenticate(
-  request: FastifyRequest,
-  reply: FastifyReply,
-): Promise<void> {
+export async function authenticate(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   const authHeader = request.headers.authorization;
 
   if (!authHeader?.startsWith("Bearer ")) {
-    throw new ProblemDocument(
-      401,
-      "Unauthorized",
-      "Missing or malformed Authorization header",
-    );
+    throw new ProblemDocument(401, "Unauthorized", "Missing or malformed Authorization header");
   }
 
   const token = authHeader.slice(7);
@@ -30,20 +23,12 @@ export async function authenticate(
   try {
     payload = verifyAccessToken(token);
   } catch {
-    throw new ProblemDocument(
-      401,
-      "Unauthorized",
-      "Access token is invalid or expired",
-    );
+    throw new ProblemDocument(401, "Unauthorized", "Access token is invalid or expired");
   }
 
   const isBlacklisted = await redis.get(`blacklist:${payload.jti}`);
   if (isBlacklisted) {
-    throw new ProblemDocument(
-      401,
-      "Unauthorized",
-      "Access token has been revoked",
-    );
+    throw new ProblemDocument(401, "Unauthorized", "Access token has been revoked");
   }
 
   request.user = payload;
