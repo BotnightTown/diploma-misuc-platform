@@ -10,3 +10,5 @@ export type UserType = {
   updated_at: Date;
   is_verified: boolean;
 };
+
+export type PublicUser = Pick<UserType, "id" | "username" | "email" | "avatar_url">;
