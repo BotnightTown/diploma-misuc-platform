@@ -9,4 +9,7 @@ export const authRoutes = async (fastify: FastifyInstance) => {
   const controller = new AuthController(service);
 
   fastify.post("/auth/register", controller.registerUser.bind(controller));
+  fastify.post("/auth/login", controller.loginUser.bind(controller));
+  fastify.post("/auth/refresh", controller.refreshTokens.bind(controller));
+  fastify.post("/auth/logout", controller.logoutUser.bind(controller));
 };
