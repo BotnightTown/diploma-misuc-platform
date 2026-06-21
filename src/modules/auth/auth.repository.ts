@@ -46,4 +46,10 @@ export class AuthRepository {
       data: { revoked_at: new Date() },
     });
   }
+
+  async findRevokedToken(tokenHash: string) {
+    return db.refresh_tokens.findFirst({
+      where: { token_hash: tokenHash, revoked_at: { not: null } },
+    });
+  }
 }
