@@ -17,6 +17,8 @@ import {
   refreshLinks,
   registerLinks,
 } from "../../utils/hateoas.utils.ts";
+import { REFRESH_COOKIE_OPTIONS } from "../../constants/COOKIE.ts";
+import { ProblemDocument } from "../../models/error.model.ts";
 
 export class AuthController {
   constructor(private service: AuthService) {}
@@ -30,22 +32,33 @@ export class AuthController {
   async loginUser(request: FastifyRequest<{ Body: LoginUserType }>, reply: FastifyReply) {
     const data = parseBody(loginUserSchema, request.body);
     const { access_token, refresh_token, user } = await this.service.loginUser(data);
+    reply.setCookie("refresh_token", refresh_token, REFRESH_COOKIE_OPTIONS);
     return reply.status(200).send({
       access_token,
-      refresh_token,
       ...createHateoasResponse(user, loginLinks(user.id)),
     });
   }
 
   async refreshTokens(request: FastifyRequest<{ Body: RefreshTokenType }>, reply: FastifyReply) {
-    const { refresh_token } = parseBody(refreshTokenSchema, request.body);
-    const tokens = await this.service.refreshTokens(refresh_token);
-    return reply.status(200).send(createHateoasResponse(tokens, refreshLinks()));
+    const rawRefreshToken = request.cookies.refresh_token;
+    if (!rawRefreshToken) {
+      throw new ProblemDocument(401, "Unauthorized", "Refresh token cookie is missing");
+    }
+    const { access_token, refresh_token } = await this.service.refreshTokens(rawRefreshToken);
+    reply.setCookie("refresh_token", refresh_token, REFRESH_COOKIE_OPTIONS);
+    return reply.status(200).send(createHateoasResponse({ access_token }, refreshLinks()));
   }
 
   async logoutUser(request: FastifyRequest<{ Body: LogoutType }>, reply: FastifyReply) {
-    const { refresh_token, access_token } = parseBody(logoutSchema, request.body);
-    await this.service.logoutUser(refresh_token, access_token);
+    const rawRefreshToken = request.cookies.refresh_token;
+    if (!rawRefreshToken) {
+      throw new ProblemDocument(401, "Unauthorized", "Refresh token cookie is missing");
+    }
+
+    const { access_token } = parseBody(logoutSchema, request.body);
+    await this.service.logoutUser(rawRefreshToken, access_token);
+
+    reply.clearCookie("refresh_token", { path: "/api/auth" });
     return reply.status(204).send();
   }
 }

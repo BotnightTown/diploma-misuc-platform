@@ -9,6 +9,7 @@ const envSchema = z.object({
   JWT_REFRESH_EXPIRES_IN: z.string().default("7d"),
   PORT: z.coerce.number().default(3000),
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  COOKIE_SECRET: z.string().min(32),
 });
 
 export const env = envSchema.parse(process.env);

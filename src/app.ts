@@ -14,7 +14,9 @@ const app = Fastify({
 
 await app.register(cors, { origin: true });
 await app.register(helmet);
-await app.register(cookie);
+await app.register(cookie, {
+  secret: env.COOKIE_SECRET,
+});
 await app.register(apiRoutes, { prefix: "/api" });
 
 const start = async () => {

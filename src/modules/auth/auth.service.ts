@@ -59,8 +59,8 @@ export class AuthService {
       throw new ProblemDocument(401, "Invalid Credentials", "Invalid email/username or password");
     }
 
-    const accessToken = generateAccessToken(user.id);
-    const refreshToken = generateRefreshToken(user.id);
+    const accessToken = generateAccessToken(user.id, user.role);
+    const refreshToken = generateRefreshToken(user.id, user.role);
     const refreshTokenHash = hashToken(refreshToken);
 
     await this.repository.createRefreshToken(user.id, refreshTokenHash);
@@ -72,8 +72,10 @@ export class AuthService {
     };
   }
 
-  async refreshTokens(rawRefreshToken: string): Promise<AuthTokens> {
-    let payload;
+  async refreshTokens(
+    rawRefreshToken: string,
+  ): Promise<{ access_token: string; refresh_token: string }> {
+    let payload: TokenPayload;
     try {
       payload = verifyRefreshToken(rawRefreshToken);
     } catch {
@@ -83,14 +85,27 @@ export class AuthService {
     const tokenHash = hashToken(rawRefreshToken);
     const storedToken = await this.repository.findRefreshToken(tokenHash);
 
-    if (!storedToken || storedToken.expires_at < new Date()) {
+    if (!storedToken) {
+      const revokedToken = await this.repository.findRevokedToken(tokenHash);
+      if (revokedToken) {
+        await this.repository.revokeAllUserRefreshTokens(revokedToken.user_id);
+        throw new ProblemDocument(
+          401,
+          "Token Reuse Detected",
+          "Suspicious activity detected. All sessions have been terminated.",
+        );
+      }
       throw new ProblemDocument(401, "Invalid Token", "Refresh token is invalid or revoked");
     }
 
-    await this.repository.revokeRefreshToken(tokenHash);
+    if (storedToken.expires_at < new Date()) {
+      throw new ProblemDocument(401, "Invalid Token", "Refresh token has expired");
+    }
 
-    const newAccessToken = generateAccessToken(payload.sub);
-    const newRefreshToken = generateRefreshToken(payload.sub);
+    // Ротація
+    await this.repository.revokeRefreshToken(tokenHash);
+    const newAccessToken = generateAccessToken(payload.sub, payload.role);
+    const newRefreshToken = generateRefreshToken(payload.sub, payload.role);
     await this.repository.createRefreshToken(payload.sub, hashToken(newRefreshToken));
 
     return { access_token: newAccessToken, refresh_token: newRefreshToken };
