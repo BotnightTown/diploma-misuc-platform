@@ -10,7 +10,12 @@ import {
   updateUsernameSchema,
   UpdateUsernameType,
 } from "./user.schema.ts";
-import { parseBody, parseUserId } from "../../utils/controller.utils.ts";
+import {
+  isMultipartRequest,
+  parseBody,
+  parseMultipartFormData,
+  parseUserId,
+} from "../../utils/controller.utils.ts";
 import {
   createHateoasResponse,
   userMutationLinks,
@@ -50,6 +55,19 @@ export class UserController {
     const data = parseBody(updateBioSchema, request.body);
     const updatedBio = await this.service.updateBio(userId, data);
     return reply.status(200).send(createHateoasResponse(updatedBio, userMutationLinks(userId)));
+  }
+
+  async updateAvatar(request: FastifyRequest<{ Params: { userId: number } }>, reply: FastifyReply) {
+    const userId = parseUserId(request.params.userId);
+
+    if (!isMultipartRequest(request)) {
+      const updatedUser = await this.service.updateAvatar(userId, null);
+      return reply.status(200).send(createHateoasResponse(updatedUser, userMutationLinks(userId)));
+    }
+
+    const { file } = await parseMultipartFormData(request);
+    const updatedUser = await this.service.updateAvatar(userId, file);
+    return reply.status(200).send(createHateoasResponse(updatedUser, userMutationLinks(userId)));
   }
 
   async changeEmail(

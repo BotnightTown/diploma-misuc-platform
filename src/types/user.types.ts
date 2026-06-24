@@ -12,3 +12,10 @@ export type UserType = {
 };
 
 export type PublicUser = Pick<UserType, "id" | "username" | "email" | "avatar_url">;
+
+export interface UserAvatarUploadData {
+  file: Buffer;
+  filename: string;
+  contentType: string;
+  size: number;
+}

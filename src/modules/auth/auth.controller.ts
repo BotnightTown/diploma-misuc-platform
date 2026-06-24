@@ -7,7 +7,6 @@ import {
   LoginUserType,
   logoutSchema,
   LogoutType,
-  refreshTokenSchema,
   RefreshTokenType,
 } from "./auth.schema.ts";
 import { parseBody } from "../../utils/controller.utils.ts";

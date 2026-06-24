@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { UserType } from "../../types/user.types.ts";
+import { UserAvatarUploadData, UserType } from "../../types/user.types.ts";
 import { UserRepository } from "./user.repository.ts";
 import {
   ChangeEmailType,
@@ -8,6 +8,16 @@ import {
   UpdateBioType,
 } from "./user.schema.ts";
 import { ProblemDocument } from "../../models/error.model.ts";
+import {
+  deleteFile,
+  extractKeyFromUrl,
+  generateStorageKey,
+  IMAGE_FOLDERS,
+  uploadFile,
+  validateFile,
+} from "../../utils/storage.utils.ts";
+
+const DEFAULT_USER_AVATAR = "default_avatar.png";
 
 export class UserService {
   constructor(private repository: UserRepository) {}
@@ -38,6 +48,36 @@ export class UserService {
 
   async updateBio(userId: number, bio: Pick<UpdateBioType, "bio">) {
     return this.repository.update(userId, bio);
+  }
+
+  private async uploadAvatar(data: UserAvatarUploadData): Promise<string> {
+    validateFile(data.contentType, data.size, "images");
+
+    const key = generateStorageKey(data.filename, IMAGE_FOLDERS.userAvatars);
+    return uploadFile({
+      bucket: "images",
+      key,
+      body: data.file,
+      contentType: data.contentType,
+      size: data.size,
+    });
+  }
+
+  async updateAvatar(userId: number, data: UserAvatarUploadData | null): Promise<UserType> {
+    const currentUser = await this.repository.findById(userId);
+    if (!currentUser) {
+      throw new ProblemDocument(404, "User Not Found", `User with ID ${userId} does not exist`);
+    }
+
+    const avatarUrl = data ? await this.uploadAvatar(data) : DEFAULT_USER_AVATAR;
+    const updatedUser = await this.repository.update(userId, { avatar_url: avatarUrl });
+
+    const oldKey = extractKeyFromUrl(currentUser.avatar_url, "images");
+    if (oldKey) {
+      await deleteFile("images", oldKey);
+    }
+
+    return updatedUser;
   }
 
   async changeEmail(userId: number, data: ChangeEmailType): Promise<UserType | null> {

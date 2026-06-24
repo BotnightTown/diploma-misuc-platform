@@ -5,6 +5,7 @@ import { UpdateUsernameType, UpdateBioType } from "./user.schema.ts";
 type UpdatePayload = Partial<
   (UpdateUsernameType | UpdateBioType) & {
     email: string;
+    avatar_url: string;
     password_hash: string;
   }
 >;
