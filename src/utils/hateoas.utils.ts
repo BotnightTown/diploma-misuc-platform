@@ -123,3 +123,21 @@ export function trackMutationLinks(trackId: number, albumId: number): HateoasLin
     { rel: "album", href: `/api/albums/${albumId}/tracks`, method: "GET" },
   ];
 }
+
+// --- Review links ---
+
+export function reviewLinks(trackId: number): HateoasLink[] {
+  return [
+    { rel: "self", href: `/api/tracks/${trackId}/reviews`, method: "GET" },
+    { rel: "create", href: `/api/tracks/${trackId}/reviews`, method: "POST" },
+    { rel: "update", href: `/api/tracks/${trackId}/reviews`, method: "PATCH" },
+    { rel: "delete", href: `/api/tracks/${trackId}/reviews`, method: "DELETE" },
+  ];
+}
+
+export function reviewMutationLinks(trackId: number): HateoasLink[] {
+  return [
+    { rel: "self", href: `/api/tracks/${trackId}/reviews`, method: "GET" },
+    { rel: "track", href: `/api/tracks/${trackId}`, method: "GET" },
+  ];
+}

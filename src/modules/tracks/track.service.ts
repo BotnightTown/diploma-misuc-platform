@@ -1,5 +1,5 @@
 import { TrackRepository } from "./track.repository.ts";
-import { UpdateTrackType } from "./track.schema.ts";
+import { CreateReviewType, UpdateTrackType } from "./track.schema.ts";
 import { ProblemDocument } from "../../models/error.model.ts";
 import {
   deleteFile,
@@ -74,5 +74,25 @@ export class TrackService {
     }
 
     await this.repository.delete(trackId);
+  }
+
+  async createReview(userId: number, trackId: number, data: CreateReviewType) {
+    await this.getById(trackId);
+    return this.repository.createReview(userId, trackId, data);
+  }
+
+  async getReviewByTrackId(trackId: number) {
+    await this.getById(trackId);
+    return this.repository.getReviewByTrackId(trackId);
+  }
+
+  async updateReview(userId: number, trackId: number, data: CreateReviewType) {
+    await this.getById(trackId);
+    return this.repository.updateReview(userId, trackId, data);
+  }
+
+  async deleteReview(userId: number, trackId: number): Promise<void> {
+    await this.getById(trackId);
+    return this.repository.deleteReview(userId, trackId);
   }
 }

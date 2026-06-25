@@ -26,8 +26,14 @@ export const updateTrackSchema = createTrackSchema
   .omit({ album_id: true, artist_id: true })
   .partial();
 
+export const createReviewSchema = z.object({
+  rating: z.coerce.number().int().min(1).max(5),
+  body: z.string().optional(),
+});
+
 export type TrackParamsType = z.infer<typeof trackParamsSchema>;
 export type TracksQueryType = z.infer<typeof tracksQuerySchema>;
 export type CreateTrackFormType = z.infer<typeof createTrackSchema>;
 export type CreateTrackType = z.infer<typeof dbTrackSchema>;
 export type UpdateTrackType = z.infer<typeof updateTrackSchema>;
+export type CreateReviewType = z.infer<typeof createReviewSchema>;

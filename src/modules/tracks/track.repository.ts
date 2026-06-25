@@ -1,5 +1,5 @@
 import { db } from "../../config/db.ts";
-import { CreateTrackType, UpdateTrackType } from "./track.schema.ts";
+import { CreateReviewType, CreateTrackType, UpdateTrackType } from "./track.schema.ts";
 
 type TrackUpdatePayload = UpdateTrackType & Partial<Pick<CreateTrackType, "audio_url">>;
 
@@ -45,5 +45,38 @@ export class TrackRepository {
 
   async delete(id: number): Promise<void> {
     await db.tracks.delete({ where: { id } });
+  }
+
+  async createReview(userId: number, trackId: number, data: CreateReviewType) {
+    return db.reviews.create({
+      data: {
+        user_id: userId,
+        track_id: trackId,
+        rating: data.rating,
+        body: data.body ?? "",
+      },
+    });
+  }
+
+  async getReviewByTrackId(trackId: number) {
+    return db.reviews.findMany({
+      where: { track_id: trackId },
+    });
+  }
+
+  async updateReview(userId: number, trackId: number, data: CreateReviewType) {
+    return db.reviews.update({
+      where: { user_id_track_id: { user_id: userId, track_id: trackId } },
+      data: {
+        rating: data.rating,
+        body: data.body,
+      },
+    });
+  }
+
+  async deleteReview(userId: number, trackId: number): Promise<void> {
+    await db.reviews.delete({
+      where: { user_id_track_id: { user_id: userId, track_id: trackId } },
+    });
   }
 }

@@ -89,7 +89,7 @@ model playlists {
   cover_url        String             @default("default_cover_url.png") @db.VarChar(255)
   is_public        Boolean            @default(false)
   created_at       DateTime           @default(now()) @db.Timestamptz(6)
-  updated_at       DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
   playlist_follows playlist_follows[]
   playlist_tracks  playlist_tracks[]
   users            users              @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "playlists_users_id_fk")
@@ -125,7 +125,7 @@ model reviews {
   rating       Int
   body         String         @default("")
   created_at   DateTime       @default(now()) @db.Timestamptz(6)
-  updated_at   DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
   review_likes review_likes[]
   tracks       tracks         @relation(fields: [track_id], references: [id], onDelete: Cascade, map: "reviews_tracks_id_fk")
   users        users          @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "reviews_users_id_fk")
@@ -270,7 +270,7 @@ model users {
   bio                                           String?
   role                                          user_role           @default(listener)
   created_at                                    DateTime            @default(now()) @db.Timestamptz(6)
-  updated_at                                    DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
   is_verified                                   Boolean             @default(false)
   activity_feed                                 activity_feed[]
   playlist_follows                              playlist_follows[]
