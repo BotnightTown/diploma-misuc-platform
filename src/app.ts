@@ -14,7 +14,10 @@ const app = Fastify({
   logger: env.NODE_ENV === "development",
 });
 
-await app.register(cors, { origin: true });
+await app.register(cors, {
+  origin: env.NODE_ENV === "production" ? ["https://yourdomain.com"] : true,
+  credentials: true,
+});
 await app.register(helmet);
 await app.register(cookie, {
   secret: env.COOKIE_SECRET,

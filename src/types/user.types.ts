@@ -19,3 +19,5 @@ export interface UserAvatarUploadData {
   contentType: string;
   size: number;
 }
+
+export type AuthenticatedUser = Omit<UserType, "password_hash">;

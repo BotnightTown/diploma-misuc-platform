@@ -1,4 +1,4 @@
-import { PublicUser, UserType } from "../../types/user.types.ts";
+import { AuthenticatedUser, PublicUser, UserType } from "../../types/user.types.ts";
 import { AuthRepository } from "./auth.repository.ts";
 import { CreateUserType, LoginUserType } from "./auth.schema.ts";
 import { ProblemDocument } from "../../models/error.model.ts";
@@ -22,12 +22,20 @@ export class AuthService {
   constructor(private repository: AuthRepository) {}
 
   async registerUser(data: CreateUserType): Promise<UserType> {
-    const existingUser = await this.repository.findByEmail(data.email);
-    if (existingUser) {
+    const existingUserEmail = await this.repository.findByEmail(data.email);
+    if (existingUserEmail) {
       throw new ProblemDocument(
         409,
         "User Already Exists",
         "A user with this email is already registered",
+      );
+    }
+    const existingUsername = await this.repository.findByUsername(data.username);
+    if (existingUsername) {
+      throw new ProblemDocument(
+        409,
+        "User Already Exists",
+        "A user with this username is already registered",
       );
     }
 
@@ -102,7 +110,6 @@ export class AuthService {
       throw new ProblemDocument(401, "Invalid Token", "Refresh token has expired");
     }
 
-    // Ротація
     await this.repository.revokeRefreshToken(tokenHash);
     const newAccessToken = generateAccessToken(payload.sub, payload.role);
     const newRefreshToken = generateRefreshToken(payload.sub, payload.role);
@@ -138,5 +145,16 @@ export class AuthService {
     if (ttl > 0) {
       await redis.set(`blacklist:${accessPayload.jti}`, "1", "EX", ttl);
     }
+  }
+
+  async getCurrentUser(userId: number): Promise<AuthenticatedUser> {
+    const user = await this.repository.findById(userId);
+
+    if (!user) {
+      throw new ProblemDocument(404, "Not Found", "User not found");
+    }
+
+    const { password_hash, ...authenticatedUser } = user;
+    return authenticatedUser;
   }
 }

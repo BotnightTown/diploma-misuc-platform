@@ -13,6 +13,7 @@ import { parseBody } from "../../utils/controller.utils.ts";
 import {
   createHateoasResponse,
   loginLinks,
+  meLinks,
   refreshLinks,
   registerLinks,
 } from "../../utils/hateoas.utils.ts";
@@ -59,5 +60,13 @@ export class AuthController {
 
     reply.clearCookie("refresh_token", { path: "/api/auth" });
     return reply.status(204).send();
+  }
+
+  async getCurrentUser(request: FastifyRequest, reply: FastifyReply) {
+    const userId = request.user.sub;
+
+    const user = await this.service.getCurrentUser(userId);
+
+    return reply.status(200).send(createHateoasResponse(user, meLinks()));
   }
 }

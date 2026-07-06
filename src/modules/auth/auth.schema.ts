@@ -13,7 +13,7 @@ export const createUserSchema = z.object({
     .regex(/^(?=.*[!@#$%^&*(),.?":{}|<>]).+$/, {
       message: "Password must contain at least one special character",
     }),
-  bio: z.string().min(1, { message: "Biography cannot be empty" }),
+  bio: z.string().optional(),
 });
 
 export const loginUserSchema = z.object({

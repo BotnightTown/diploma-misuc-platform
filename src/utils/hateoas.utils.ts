@@ -39,6 +39,14 @@ export function userMutationLinks(userId: number): HateoasLink[] {
 
 // --- Auth links ---
 
+export function meLinks(): HateoasLink[] {
+  return [
+    { rel: "self", href: `/api/auth/me`, method: "GET" },
+    { rel: "refresh", href: `/api/auth/refresh`, method: "POST" },
+    { rel: "logout", href: `/api/auth/logout`, method: "POST" },
+  ];
+}
+
 export function registerLinks(): HateoasLink[] {
   return [{ rel: "login", href: "/api/auth/login", method: "POST" }];
 }
