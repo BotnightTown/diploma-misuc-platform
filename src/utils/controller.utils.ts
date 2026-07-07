@@ -66,3 +66,9 @@ export async function parseMultipartFormData(
 
   return { file, meta };
 }
+
+export function assertSelfOrForbidden(request: FastifyRequest, targetUserId: number) {
+  if (request.user.sub !== targetUserId) {
+    throw new ProblemDocument(403, "Forbidden", "You can only modify your own account");
+  }
+}
