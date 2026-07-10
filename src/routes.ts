@@ -4,6 +4,7 @@ import { userRoutes } from "./modules/users/user.routes.ts";
 import { artistRoutes } from "./modules/artists/artist.routes.ts";
 import { albumRoutes } from "./modules/albums/album.routes.ts";
 import { trackRoutes } from "./modules/tracks/track.routes.ts";
+import { playlistRoutes } from "./modules/playlists/playlists.routes.ts";
 
 export const apiRoutes = async (fastify: FastifyInstance) => {
   await fastify.register(authRoutes);
@@ -11,4 +12,5 @@ export const apiRoutes = async (fastify: FastifyInstance) => {
   await fastify.register(artistRoutes);
   await fastify.register(albumRoutes);
   await fastify.register(trackRoutes);
+  await fastify.register(playlistRoutes);
 };

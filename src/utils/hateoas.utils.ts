@@ -149,3 +149,45 @@ export function reviewMutationLinks(trackId: number): HateoasLink[] {
     { rel: "track", href: `/api/tracks/${trackId}`, method: "GET" },
   ];
 }
+
+// --- Playlist links ---
+
+export function playlistListLinks(): HateoasLink[] {
+  return [
+    { rel: "self", href: "/api/playlists", method: "GET" },
+    { rel: "create", href: "/api/playlists", method: "POST" },
+  ];
+}
+
+export function playlistLinks(playlistId: number): HateoasLink[] {
+  return [
+    { rel: "self", href: `/api/playlists/${playlistId}`, method: "GET" },
+    { rel: "tracks", href: `/api/playlists/${playlistId}/tracks`, method: "GET" },
+    { rel: "addTrack", href: `/api/playlists/${playlistId}/tracks`, method: "POST" },
+    { rel: "update", href: `/api/playlists/${playlistId}`, method: "PATCH" },
+    { rel: "delete", href: `/api/playlists/${playlistId}`, method: "DELETE" },
+    { rel: "follow", href: `/api/playlists/${playlistId}/follow`, method: "POST" },
+    { rel: "unfollow", href: `/api/playlists/${playlistId}/follow`, method: "DELETE" },
+  ];
+}
+
+export function playlistMutationLinks(playlistId: number): HateoasLink[] {
+  return [
+    { rel: "self", href: `/api/playlists/${playlistId}`, method: "GET" },
+    { rel: "list", href: "/api/playlists", method: "GET" },
+  ];
+}
+
+export function playlistTrackLinks(playlistId: number, trackId: number): HateoasLink[] {
+  return [
+    { rel: "playlist", href: `/api/playlists/${playlistId}`, method: "GET" },
+    { rel: "remove", href: `/api/playlists/${playlistId}/tracks/${trackId}`, method: "DELETE" },
+  ];
+}
+
+export function userPlaylistsLinks(userId: number): HateoasLink[] {
+  return [
+    { rel: "self", href: `/api/users/${userId}/playlists`, method: "GET" },
+    { rel: "user", href: `/api/users/${userId}`, method: "GET" },
+  ];
+}
