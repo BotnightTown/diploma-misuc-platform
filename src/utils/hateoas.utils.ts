@@ -13,8 +13,21 @@ export interface HateoasResponse<T> {
   _links: HateoasLink[];
 }
 
-export function createHateoasResponse<T>(data: T, links: HateoasLink[]): HateoasResponse<T> {
-  return { data, _links: links };
+export interface HateoasResponseWithMeta<T, M> extends HateoasResponse<T> {
+  meta: M;
+}
+
+export function createHateoasResponse<T>(data: T, links: HateoasLink[]): HateoasResponse<T>;
+export function createHateoasResponse<T, M>(
+  data: T,
+  links: HateoasLink[],
+  meta: M,
+): HateoasResponseWithMeta<T, M>;
+export function createHateoasResponse<T, M>(data: T, links: HateoasLink[], meta?: M) {
+  if (meta === undefined) {
+    return { data, _links: links };
+  }
+  return { data, _links: links, meta };
 }
 
 // --- User links ---
@@ -115,6 +128,13 @@ export function albumMutationLinks(albumId: number): HateoasLink[] {
 }
 
 // --- Track links ---
+
+export function trackListLinks(): HateoasLink[] {
+  return [
+    { rel: "self", href: "/api/tracks", method: "GET" },
+    { rel: "create", href: "/api/tracks", method: "POST" },
+  ];
+}
 
 export function trackLinks(trackId: number): HateoasLink[] {
   return [

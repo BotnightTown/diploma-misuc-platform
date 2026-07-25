@@ -5,6 +5,7 @@ import {
   ArtistsQueryType,
   createArtistSchema,
   CreateArtistType,
+  FollowType,
   updateArtistSchema,
   UpdateArtistType,
 } from "./artist.schema.ts";
@@ -100,6 +101,26 @@ export class ArtistController {
   async delete(request: FastifyRequest<{ Params: { artistId: number } }>, reply: FastifyReply) {
     const artistId = parseUserId(request.params.artistId);
     await this.service.delete(artistId);
+    return reply.status(204).send();
+  }
+
+  async followArtist(
+    request: FastifyRequest<{ Params: { artistId: number }; Body: FollowType }>,
+    reply: FastifyReply,
+  ) {
+    const artistId = parseUserId(request.params.artistId);
+    const userId = parseUserId(request.body.followerId);
+    await this.service.followArtist(artistId, userId);
+    return reply.status(204).send();
+  }
+
+  async deleteFollower(
+    request: FastifyRequest<{ Params: { artistId: number }; Body: FollowType }>,
+    reply: FastifyReply,
+  ) {
+    const artistId = parseUserId(request.params.artistId);
+    const userId = parseUserId(request.body.followerId);
+    await this.service.deleteFollower(artistId, userId);
     return reply.status(204).send();
   }
 }

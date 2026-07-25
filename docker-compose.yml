@@ -59,12 +59,13 @@ services:
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: postgres://my_user:my_password@postgres_db:5432/diploma_music
-      REDIS_URL: redis://redis_cache:6379
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
-      JWT_ACCESS_EXPIRES_IN: 15m
-      JWT_REFRESH_EXPIRES_IN: 7d
+      JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN}
+      COOKIE_SECRET: ${COOKIE_SECRET}
       MINIO_ENDPOINT: minio
       MINIO_PORT: 9000
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}

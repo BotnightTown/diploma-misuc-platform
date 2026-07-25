@@ -22,8 +22,13 @@ export const dbArtistSchema = createArtistSchema.extend({
 
 export const updateArtistSchema = createArtistSchema.partial();
 
+export const followSchema = z.object({
+  followerId: z.number().int().positive(),
+});
+
 export type ArtistParamsType = z.infer<typeof artistParamsSchema>;
 export type ArtistsQueryType = z.infer<typeof artistsQuerySchema>;
 export type CreateArtistFormType = z.infer<typeof createArtistSchema>;
 export type CreateArtistType = z.infer<typeof dbArtistSchema>;
 export type UpdateArtistType = z.infer<typeof updateArtistSchema>;
+export type FollowType = z.infer<typeof followSchema>;

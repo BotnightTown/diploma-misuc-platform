@@ -5,6 +5,8 @@ import {
   ChangeEmailType,
   changePasswordSchema,
   ChangePasswordType,
+  followSchema,
+  FollowType,
   updateBioSchema,
   UpdateBioType,
   updateUsernameSchema,
@@ -101,6 +103,46 @@ export class UserController {
   async deleteUser(request: FastifyRequest<{ Params: { userId: number } }>, reply: FastifyReply) {
     const userId = parseUserId(request.params.userId);
     await this.service.deleteUser(userId);
+    return reply.status(204).send();
+  }
+
+  async getFollowers(request: FastifyRequest<{ Params: { userId: number } }>, reply: FastifyReply) {
+    const userId = parseUserId(request.params.userId);
+    const followers = await this.service.getFollowers(userId);
+    return reply.status(200).send(createHateoasResponse(followers, userProfileLinks(userId)));
+  }
+
+  async getFollowing(request: FastifyRequest<{ Params: { userId: number } }>, reply: FastifyReply) {
+    const userId = parseUserId(request.params.userId);
+    const following = await this.service.getFollowing(userId);
+    return reply.status(200).send(createHateoasResponse(following, userProfileLinks(userId)));
+  }
+
+  async followUser(
+    request: FastifyRequest<{
+      Params: { userId: number };
+      Body: FollowType;
+    }>,
+    reply: FastifyReply,
+  ) {
+    const userId = parseUserId(request.params.userId);
+    const data = parseBody(followSchema, request.body);
+
+    await this.service.followUser(userId, data.followingId);
+    return reply.status(204).send();
+  }
+
+  async unfollowUser(
+    request: FastifyRequest<{
+      Params: { userId: number };
+      Body: FollowType;
+    }>,
+    reply: FastifyReply,
+  ) {
+    const userId = parseUserId(request.params.userId);
+    const data = parseBody(followSchema, request.body);
+
+    await this.service.unfollowUser(userId, data.followingId);
     return reply.status(204).send();
   }
 }

@@ -19,6 +19,17 @@ import {
 
 const DEFAULT_USER_AVATAR = "default_avatar.png";
 
+const PRISMA_UNIQUE_CONSTRAINT_CODE = "P2002";
+
+function isUniqueConstraintError(err: unknown): boolean {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "code" in err &&
+    (err as { code?: unknown }).code === PRISMA_UNIQUE_CONSTRAINT_CODE
+  );
+}
+
 export class UserService {
   constructor(private repository: UserRepository) {}
 
@@ -133,5 +144,63 @@ export class UserService {
     }
 
     await this.repository.delete(userId);
+  }
+
+  async getFollowers(userId: number): Promise<UserType[]> {
+    const user = await this.repository.findById(userId);
+    if (!user) {
+      throw new ProblemDocument(404, "User Not Found", `User with ID ${userId} does not exist`);
+    }
+
+    return this.repository.findFollowers(userId);
+  }
+
+  async getFollowing(userId: number): Promise<UserType[]> {
+    const user = await this.repository.findById(userId);
+    if (!user) {
+      throw new ProblemDocument(404, "User Not Found", `User with ID ${userId} does not exist`);
+    }
+
+    return this.repository.findFollowing(userId);
+  }
+
+  async followUser(followerId: number, followingId: number): Promise<void> {
+    if (followerId === followingId) {
+      throw new ProblemDocument(400, "Bad Request", "Users cannot follow themselves");
+    }
+
+    const [follower, following] = await Promise.all([
+      this.repository.findById(followerId),
+      this.repository.findById(followingId),
+    ]);
+
+    if (!follower || !following) {
+      throw new ProblemDocument(404, "User Not Found", "One or both users do not exist");
+    }
+
+    try {
+      await this.repository.createFollow(followerId, followingId);
+    } catch (err) {
+      if (isUniqueConstraintError(err)) {
+        throw new ProblemDocument(409, "Conflict", "You are already following this user");
+      }
+      throw err;
+    }
+  }
+
+  async unfollowUser(followerId: number, followingId: number): Promise<void> {
+    const [follower, following] = await Promise.all([
+      this.repository.findById(followerId),
+      this.repository.findById(followingId),
+    ]);
+
+    if (!follower || !following) {
+      throw new ProblemDocument(404, "User Not Found", "One or both users do not exist");
+    }
+
+    const deletedCount = await this.repository.deleteFollow(followerId, followingId);
+    if (!deletedCount) {
+      throw new ProblemDocument(409, "Conflict", "You are not following this user");
+    }
   }
 }

@@ -105,4 +105,36 @@ export class ArtistService {
 
     await this.repository.delete(artistId);
   }
+
+  async followArtist(artistId: number, userId: number) {
+    const artist = await this.repository.findById(artistId);
+    if (!artist) {
+      throw new ProblemDocument(
+        404,
+        "Artist Not Found",
+        `Artist with ID ${artistId} does not exist`,
+      );
+    }
+    const user = await this.repository.findById(userId);
+    if (!user) {
+      throw new ProblemDocument(404, "User Not Found", `User with ID ${userId} does not exist`);
+    }
+
+    return this.repository.followArtist(artistId, userId);
+  }
+
+  async deleteFollower(artistId: number, userId: number): Promise<void> {
+    const [artist, user] = await Promise.all([
+      this.repository.findById(artistId),
+      this.repository.findById(userId),
+    ]);
+    if (!artist || !user) {
+      throw new ProblemDocument(
+        404,
+        "User Not Found",
+        "Artist or user with the given ID does not exist",
+      );
+    }
+    await this.repository.deleteFollower(artistId, userId);
+  }
 }

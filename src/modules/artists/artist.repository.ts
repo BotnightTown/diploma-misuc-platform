@@ -34,4 +34,16 @@ export class ArtistRepository {
   async delete(id: number): Promise<void> {
     await db.artists.delete({ where: { id } });
   }
+
+  async getFollowers(artistId: number) {
+    return db.user_follows_artists.findMany({ where: { artist_id: artistId } });
+  }
+
+  async followArtist(artistId: number, userId: number) {
+    return db.user_follows_artists.create({ data: { artist_id: artistId, user_id: userId } });
+  }
+
+  async deleteFollower(artistId: number, userId: number): Promise<void> {
+    await db.user_follows_artists.deleteMany({ where: { artist_id: artistId, user_id: userId } });
+  }
 }

@@ -4,6 +4,8 @@ import {
   createReviewSchema,
   CreateReviewType,
   createTrackSchema,
+  tracksQuerySchema,
+  TracksQueryRaw,
   updateTrackSchema,
   UpdateTrackType,
 } from "./track.schema.ts";
@@ -18,12 +20,21 @@ import {
   reviewLinks,
   reviewMutationLinks,
   trackLinks,
+  trackListLinks,
   trackMutationLinks,
 } from "../../utils/hateoas.utils.ts";
 import { ProblemDocument } from "../../models/error.model.ts";
 
 export class TrackController {
   constructor(private service: TrackService) {}
+
+  async getTracks(request: FastifyRequest<{ Querystring: TracksQueryRaw }>, reply: FastifyReply) {
+    const query = parseBody(tracksQuerySchema, request.query);
+    const result = await this.service.getTracks(query);
+    return reply
+      .status(200)
+      .send(createHateoasResponse(result.data, trackListLinks(), result.meta));
+  }
 
   async getById(request: FastifyRequest<{ Params: { trackId: number } }>, reply: FastifyReply) {
     const trackId = parseUserId(request.params.trackId);
@@ -141,6 +152,22 @@ export class TrackController {
     const trackId = parseUserId(request.params.trackId);
 
     await this.service.deleteReview(userId, trackId);
+    return reply.status(204).send();
+  }
+
+  async like(request: FastifyRequest<{ Params: { trackId: number } }>, reply: FastifyReply) {
+    const userId = parseUserId(request.user.sub);
+    const trackId = parseUserId(request.params.trackId);
+
+    await this.service.like(userId, trackId);
+    return reply.status(204).send();
+  }
+
+  async unlike(request: FastifyRequest<{ Params: { trackId: number } }>, reply: FastifyReply) {
+    const userId = parseUserId(request.user.sub);
+    const trackId = parseUserId(request.params.trackId);
+
+    await this.service.unlike(userId, trackId);
     return reply.status(204).send();
   }
 }

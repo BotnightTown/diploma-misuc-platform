@@ -30,4 +30,44 @@ export class UserRepository {
   async delete(id: number): Promise<void> {
     await db.users.delete({ where: { id } });
   }
+
+  async findFollowers(id: number): Promise<UserType[]> {
+    return db.users.findMany({
+      where: {
+        user_follows_user_follows_follower_idTousers: {
+          some: { following_id: id },
+        },
+      },
+    });
+  }
+
+  async findFollowing(id: number): Promise<UserType[]> {
+    return db.users.findMany({
+      where: {
+        user_follows_user_follows_following_idTousers: {
+          some: { follower_id: id },
+        },
+      },
+    });
+  }
+
+  async createFollow(followerId: number, followingId: number): Promise<void> {
+    await db.user_follows.create({
+      data: {
+        follower_id: followerId,
+        following_id: followingId,
+      },
+    });
+  }
+
+  async deleteFollow(followerId: number, followingId: number): Promise<number> {
+    const result = await db.user_follows.deleteMany({
+      where: {
+        follower_id: followerId,
+        following_id: followingId,
+      },
+    });
+
+    return result.count;
+  }
 }

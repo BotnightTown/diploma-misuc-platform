@@ -4,12 +4,21 @@ import { TrackService } from "./track.service.ts";
 import { TrackController } from "./track.controller.ts";
 import { authenticate } from "../../plugins/authenticate.ts";
 import { requireAdmin } from "../../plugins/requireAdmin.ts";
-import { CreateReviewType, CreateTrackType, UpdateTrackType } from "./track.schema.ts";
+import {
+  CreateReviewType,
+  CreateTrackType,
+  TracksQueryRaw,
+  UpdateTrackType,
+} from "./track.schema.ts";
 
 export const trackRoutes = async (fastify: FastifyInstance) => {
   const repository = new TrackRepository();
   const service = new TrackService(repository);
   const controller = new TrackController(service);
+
+  fastify.get<{ Querystring: TracksQueryRaw }>("/tracks", (req, reply) =>
+    controller.getTracks(req, reply),
+  );
 
   fastify.get<{ Params: { trackId: number } }>("/tracks/:trackId", (req, reply) =>
     controller.getById(req, reply),
@@ -59,5 +68,17 @@ export const trackRoutes = async (fastify: FastifyInstance) => {
     "/tracks/:trackId",
     { preHandler: [authenticate, requireAdmin] },
     (req, reply) => controller.delete(req, reply),
+  );
+
+  fastify.post<{ Params: { trackId: number } }>(
+    "/tracks/:trackId/like",
+    { preHandler: [authenticate] },
+    (req, reply) => controller.like(req, reply),
+  );
+
+  fastify.delete<{ Params: { trackId: number } }>(
+    "/tracks/:trackId/like",
+    { preHandler: [authenticate] },
+    (req, reply) => controller.unlike(req, reply),
   );
 };

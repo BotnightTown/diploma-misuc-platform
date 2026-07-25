@@ -1,5 +1,5 @@
 import { TrackRepository } from "./track.repository.ts";
-import { CreateReviewType, UpdateTrackType } from "./track.schema.ts";
+import { CreateReviewType, TracksQueryType, UpdateTrackType } from "./track.schema.ts";
 import { ProblemDocument } from "../../models/error.model.ts";
 import {
   deleteFile,
@@ -12,6 +12,19 @@ import { TrackUpdateUploadData, TrackUploadData } from "../../types/tracks.types
 
 export class TrackService {
   constructor(private repository: TrackRepository) {}
+
+  async getTracks(query: TracksQueryType) {
+    const { data, total } = await this.repository.findMany(query);
+
+    return {
+      data,
+      meta: {
+        total,
+        page: query.page,
+        limit: query.limit,
+      },
+    };
+  }
 
   async getById(trackId: number) {
     const track = await this.repository.findById(trackId);
@@ -78,21 +91,81 @@ export class TrackService {
 
   async createReview(userId: number, trackId: number, data: CreateReviewType) {
     await this.getById(trackId);
+    const existingReview = await this.repository.findReviewByUserAndTrack(userId, trackId);
+    if (existingReview) {
+      throw new ProblemDocument(
+        400,
+        "Review Already Exists",
+        `User with ID ${userId} has already reviewed track ${trackId}`,
+      );
+    }
     return this.repository.createReview(userId, trackId, data);
   }
 
   async getReviewByTrackId(trackId: number) {
     await this.getById(trackId);
-    return this.repository.getReviewByTrackId(trackId);
+    const existingReviews = await this.repository.getReviewsByTrackId(trackId);
+    if (!existingReviews.length) {
+      throw new ProblemDocument(
+        404,
+        "Review Not Found",
+        `No review found for track with ID ${trackId}`,
+      );
+    }
+    return existingReviews;
   }
 
   async updateReview(userId: number, trackId: number, data: CreateReviewType) {
     await this.getById(trackId);
+    const existingReview = await this.repository.findReviewByUserAndTrack(userId, trackId);
+    if (!existingReview) {
+      throw new ProblemDocument(
+        404,
+        "Review Not Found",
+        `No review found for track with ID ${trackId}`,
+      );
+    }
     return this.repository.updateReview(userId, trackId, data);
   }
 
   async deleteReview(userId: number, trackId: number): Promise<void> {
     await this.getById(trackId);
+    const existingReview = await this.repository.findReviewByUserAndTrack(userId, trackId);
+    if (!existingReview) {
+      throw new ProblemDocument(
+        404,
+        "Review Not Found",
+        `No review found for track with ID ${trackId}`,
+      );
+    }
     return this.repository.deleteReview(userId, trackId);
+  }
+
+  async like(userId: number, trackId: number): Promise<void> {
+    await this.getById(trackId);
+    const existingLike = await this.repository.findLike(userId, trackId);
+
+    if (existingLike) {
+      throw new ProblemDocument(
+        400,
+        "Already Liked",
+        `User with ID ${userId} has already liked track ${trackId}`,
+      );
+    }
+
+    return this.repository.like(userId, trackId);
+  }
+
+  async unlike(userId: number, trackId: number): Promise<void> {
+    await this.getById(trackId);
+    const existingLike = await this.repository.findLike(userId, trackId);
+    if (!existingLike) {
+      throw new ProblemDocument(
+        400,
+        "Not Liked",
+        `User with ID ${userId} has not liked track ${trackId}`,
+      );
+    }
+    return this.repository.unlike(userId, trackId);
   }
 }

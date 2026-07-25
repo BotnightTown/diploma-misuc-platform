@@ -4,7 +4,7 @@ import { ArtistService } from "./artist.service.ts";
 import { ArtistController } from "./artist.controller.ts";
 import { authenticate } from "../../plugins/authenticate.ts";
 import { requireAdmin } from "../../plugins/requireAdmin.ts";
-import { CreateArtistType, UpdateArtistType } from "./artist.schema.ts";
+import { CreateArtistType, FollowType, UpdateArtistType } from "./artist.schema.ts";
 
 export const artistRoutes = async (fastify: FastifyInstance) => {
   const repository = new ArtistRepository();
@@ -30,5 +30,15 @@ export const artistRoutes = async (fastify: FastifyInstance) => {
     "/artists/:artistId",
     { preHandler: [authenticate, requireAdmin] },
     controller.delete.bind(controller),
+  );
+  fastify.post<{ Params: { artistId: number }; Body: FollowType }>(
+    "/artists/:artistId/follow",
+    { preHandler: [authenticate, requireAdmin] },
+    controller.followArtist.bind(controller),
+  );
+  fastify.delete<{ Params: { artistId: number }; Body: FollowType }>(
+    "/artists/:artistId/follow",
+    { preHandler: [authenticate, requireAdmin] },
+    controller.deleteFollower.bind(controller),
   );
 };

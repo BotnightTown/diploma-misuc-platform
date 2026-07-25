@@ -27,7 +27,12 @@ export const changeEmailSchema = z.object({
   new_email: z.email({ message: "Invalid email format" }),
 });
 
+export const followSchema = z.object({
+  followingId: z.number().int().positive(),
+});
+
 export type UpdateUsernameType = z.infer<typeof updateUsernameSchema>;
 export type UpdateBioType = z.infer<typeof updateBioSchema>;
 export type ChangePasswordType = z.infer<typeof changePasswordSchema>;
 export type ChangeEmailType = z.infer<typeof changeEmailSchema>;
+export type FollowType = z.infer<typeof followSchema>;
