@@ -184,6 +184,7 @@ export function playlistLinks(playlistId: number): HateoasLink[] {
     { rel: "self", href: `/api/playlists/${playlistId}`, method: "GET" },
     { rel: "tracks", href: `/api/playlists/${playlistId}/tracks`, method: "GET" },
     { rel: "addTrack", href: `/api/playlists/${playlistId}/tracks`, method: "POST" },
+    { rel: "reorderTracks", href: `/api/playlists/${playlistId}/tracks/reorder`, method: "PATCH" },
     { rel: "update", href: `/api/playlists/${playlistId}`, method: "PATCH" },
     { rel: "delete", href: `/api/playlists/${playlistId}`, method: "DELETE" },
     { rel: "follow", href: `/api/playlists/${playlistId}/follow`, method: "POST" },

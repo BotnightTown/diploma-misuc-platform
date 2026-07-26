@@ -9,6 +9,8 @@ import {
   UpdatePlaylistType,
   addTrackToPlaylistSchema,
   AddTrackToPlaylistType,
+  reorderPlaylistTracksSchema,
+  ReorderPlaylistTracksType,
 } from "./playlists.schema.ts";
 import { parseBody, parseUserId } from "../../utils/controller.utils.ts";
 import {
@@ -100,6 +102,16 @@ export class PlaylistController {
     const trackId = parseUserId(request.params.trackId);
     await this.service.removeTrack(playlistId, trackId, request.user.sub);
     return reply.status(204).send();
+  }
+
+  async reorderTracks(
+    request: FastifyRequest<{ Params: { playlistId: number }; Body: ReorderPlaylistTracksType }>,
+    reply: FastifyReply,
+  ) {
+    const playlistId = parseUserId(request.params.playlistId);
+    const data = parseBody(reorderPlaylistTracksSchema, request.body);
+    const playlistTrack = await this.service.reorderTracks(playlistId, request.user.sub, data);
+    return reply.status(200).send(createHateoasResponse(playlistTrack, playlistLinks(playlistId)));
   }
 
   async follow(request: FastifyRequest<{ Params: { playlistId: number } }>, reply: FastifyReply) {

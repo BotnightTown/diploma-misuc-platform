@@ -4,6 +4,7 @@ import {
   AddTrackToPlaylistType,
   CreatePlaylistType,
   PlaylistsQueryType,
+  ReorderPlaylistTracksType,
   UpdatePlaylistType,
 } from "./playlists.schema.ts";
 
@@ -38,7 +39,6 @@ export class PlaylistService {
       );
     }
 
-    // Приватний плейлист чужого юзера — 404, а не 403, щоб не палити його існування
     if (!playlist.is_public && playlist.user_id !== requesterId) {
       throw new ProblemDocument(
         404,
@@ -122,6 +122,30 @@ export class PlaylistService {
     }
 
     await this.repository.removeTrack(playlistId, trackId);
+  }
+
+  async reorderTracks(playlistId: number, userId: number, data: ReorderPlaylistTracksType) {
+    await this.assertOwnership(playlistId, userId);
+
+    const tracks = await this.repository.findTracksForReordering(playlistId);
+    const currentIndex = tracks.findIndex((track) => track.track_id === data.track_id);
+    if (currentIndex === -1) {
+      throw new ProblemDocument(404, "Track Not In Playlist", "This track is not in the playlist");
+    }
+    if (data.position >= tracks.length) {
+      throw new ProblemDocument(
+        400,
+        "Invalid Track Position",
+        `Position must be between 0 and ${tracks.length - 1}`,
+      );
+    }
+
+    const orderedTrackIds = tracks.map((track) => track.track_id);
+    const [trackId] = orderedTrackIds.splice(currentIndex, 1);
+    orderedTrackIds.splice(data.position, 0, trackId);
+
+    await this.repository.updateTrackPositions(playlistId, orderedTrackIds);
+    return this.repository.findTrackInPlaylist(playlistId, data.track_id);
   }
 
   async follow(playlistId: number, userId: number) {

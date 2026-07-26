@@ -9,6 +9,7 @@ import {
   CreatePlaylistType,
   UpdatePlaylistType,
   AddTrackToPlaylistType,
+  ReorderPlaylistTracksType,
 } from "./playlists.schema.ts";
 
 export const playlistRoutes = async (fastify: FastifyInstance) => {
@@ -68,6 +69,12 @@ export const playlistRoutes = async (fastify: FastifyInstance) => {
     "/playlists/:playlistId/tracks/:trackId",
     { preHandler: authenticate },
     controller.removeTrack.bind(controller),
+  );
+
+  fastify.patch<{ Params: { playlistId: number }; Body: ReorderPlaylistTracksType }>(
+    "/playlists/:playlistId/tracks/reorder",
+    { preHandler: authenticate },
+    controller.reorderTracks.bind(controller),
   );
 
   fastify.post<{ Params: { playlistId: number } }>(

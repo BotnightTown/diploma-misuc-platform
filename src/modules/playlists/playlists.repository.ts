@@ -89,6 +89,24 @@ export class PlaylistRepository {
     });
   }
 
+  async findTracksForReordering(playlistId: number) {
+    return db.playlist_tracks.findMany({
+      where: { playlist_id: playlistId },
+      orderBy: [{ position: "asc" }, { track_id: "asc" }],
+    });
+  }
+
+  async updateTrackPositions(playlistId: number, trackIds: number[]) {
+    await db.$transaction(
+      trackIds.map((trackId, position) =>
+        db.playlist_tracks.update({
+          where: { playlist_id_track_id: { playlist_id: playlistId, track_id: trackId } },
+          data: { position },
+        }),
+      ),
+    );
+  }
+
   async removeTrack(playlistId: number, trackId: number): Promise<void> {
     await db.playlist_tracks.delete({
       where: { playlist_id_track_id: { playlist_id: playlistId, track_id: trackId } },

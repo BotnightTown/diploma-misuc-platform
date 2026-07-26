@@ -27,6 +27,7 @@ export class TrackRepository {
         include: {
           artists: { select: { id: true, name: true, avatar_url: true } },
           albums: { select: { id: true, title: true, cover_url: true } },
+          _count: { select: { track_likes: true } },
         },
       }),
       db.tracks.count({ where }),
