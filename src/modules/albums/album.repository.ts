@@ -4,7 +4,7 @@ import { CreateAlbumType, UpdateAlbumType } from "./album.schema.ts";
 export class AlbumRepository {
   async findAll(page: number, limit: number) {
     const offset = (page - 1) * limit;
-    const [albums, total] = await Promise.all([
+    const [data, total] = await Promise.all([
       db.albums.findMany({
         skip: offset,
         take: limit,
@@ -13,7 +13,7 @@ export class AlbumRepository {
       }),
       db.albums.count(),
     ]);
-    return { albums, total };
+    return { data, total };
   }
 
   async findById(id: number) {

@@ -7,6 +7,14 @@ import {
   ReorderPlaylistTracksType,
   UpdatePlaylistType,
 } from "./playlists.schema.ts";
+import {
+  deleteFile,
+  extractKeyFromUrl,
+  IMAGE_FOLDERS,
+  uploadCover,
+} from "../../utils/storage.utils.ts";
+import { PlaylistCoverUploadData } from "../../types/playlists.types.ts";
+import { DEFAULT_PLAYLIST_COVER } from "../../constants/DEFAULT.ts";
 
 export class PlaylistService {
   constructor(private repository: PlaylistRepository) {}
@@ -64,8 +72,15 @@ export class PlaylistService {
     };
   }
 
-  async create(userId: number, data: CreatePlaylistType) {
-    return this.repository.create(userId, data);
+  async create(
+    userId: number,
+    data: CreatePlaylistType,
+    coverData: PlaylistCoverUploadData | null,
+  ) {
+    const coverUrl = coverData
+      ? await uploadCover(coverData, IMAGE_FOLDERS.playlistCovers)
+      : DEFAULT_PLAYLIST_COVER;
+    return this.repository.create(userId, { ...data, cover_url: coverUrl });
   }
 
   private async assertOwnership(playlistId: number, userId: number) {
@@ -87,9 +102,32 @@ export class PlaylistService {
     return playlist;
   }
 
-  async update(playlistId: number, userId: number, data: UpdatePlaylistType) {
-    await this.assertOwnership(playlistId, userId);
-    return this.repository.update(playlistId, data);
+  async update(
+    playlistId: number,
+    userId: number,
+    data: UpdatePlaylistType,
+    coverData: PlaylistCoverUploadData | null,
+  ) {
+    const playlist = await this.assertOwnership(playlistId, userId);
+
+    let coverUrl: string | undefined;
+    if (coverData) {
+      coverUrl = await uploadCover(coverData, IMAGE_FOLDERS.playlistCovers);
+    }
+
+    const updated = await this.repository.update(playlistId, {
+      ...data,
+      ...(coverUrl ? { cover_url: coverUrl } : {}),
+    });
+
+    if (coverUrl) {
+      const oldKey = extractKeyFromUrl(playlist.cover_url, "images");
+      if (oldKey && playlist.cover_url !== DEFAULT_PLAYLIST_COVER) {
+        await deleteFile("images", oldKey);
+      }
+    }
+
+    return updated;
   }
 
   async delete(playlistId: number, userId: number): Promise<void> {

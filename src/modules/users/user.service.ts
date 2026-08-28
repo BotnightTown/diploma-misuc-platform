@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { UserAvatarUploadData, UserType } from "../../types/user.types.ts";
+import { PaginationParams, UserAvatarUploadData, UserType } from "../../types/user.types.ts";
 import { UserRepository } from "./user.repository.ts";
 import {
   ChangeEmailType,
@@ -146,22 +146,22 @@ export class UserService {
     await this.repository.delete(userId);
   }
 
-  async getFollowers(userId: number): Promise<UserType[]> {
+  async getFollowers(userId: number, pagination: PaginationParams) {
     const user = await this.repository.findById(userId);
     if (!user) {
       throw new ProblemDocument(404, "User Not Found", `User with ID ${userId} does not exist`);
     }
 
-    return this.repository.findFollowers(userId);
+    return this.repository.findFollowers(userId, pagination);
   }
 
-  async getFollowing(userId: number): Promise<UserType[]> {
+  async getFollowing(userId: number, pagination: PaginationParams) {
     const user = await this.repository.findById(userId);
     if (!user) {
       throw new ProblemDocument(404, "User Not Found", `User with ID ${userId} does not exist`);
     }
 
-    return this.repository.findFollowing(userId);
+    return this.repository.findFollowing(userId, pagination);
   }
 
   async followUser(followerId: number, followingId: number): Promise<void> {

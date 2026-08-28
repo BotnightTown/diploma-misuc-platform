@@ -1,24 +1,27 @@
 import { ArtistRepository } from "./artist.repository.ts";
-import { UpdateArtistType, ArtistsQueryType, CreateArtistFormType } from "./artist.schema.ts";
+import { UpdateArtistType, ArtistsQueryType, CreateArtistType } from "./artist.schema.ts";
 import { ProblemDocument } from "../../models/error.model.ts";
 import {
   deleteFile,
   extractKeyFromUrl,
   generateStorageKey,
   IMAGE_FOLDERS,
+  uploadCover,
   uploadFile,
   validateFile,
 } from "../../utils/storage.utils.ts";
 import { ArtistUpdateUploadData, ArtistUploadData } from "../../types/artist.types.ts";
+import { UploadDataType } from "../../types/upload.types.ts";
+import { DEFAULT_AVATAR_COVER } from "../../constants/DEFAULT.ts";
 
 export class ArtistService {
   constructor(private repository: ArtistRepository) {}
 
   async getAll(query: ArtistsQueryType) {
     const { page, limit } = query;
-    const { artists, total } = await this.repository.findAll(page, limit);
+    const { data, total } = await this.repository.findAll(page, limit);
     return {
-      artists,
+      data,
       pagination: {
         page,
         limit,
@@ -63,36 +66,39 @@ export class ArtistService {
     });
   }
 
-  async create(data: ArtistUploadData | CreateArtistFormType) {
-    if (!("file" in data)) {
-      const { avatar_url, ...artistData } = data;
-      return this.repository.create(artistData);
-    }
-
-    const avatarUrl = await this.uploadAvatar(data);
-    return this.repository.create({ ...data.meta, avatar_url: avatarUrl });
+  async create(data: CreateArtistType, avatarData: UploadDataType | null) {
+    const avatarUrl = avatarData
+      ? await uploadCover(avatarData, IMAGE_FOLDERS.artistAvatars)
+      : DEFAULT_AVATAR_COVER;
+    return this.repository.create({ ...data, avatar_url: avatarUrl });
   }
 
-  async update(artistId: number, data: ArtistUpdateUploadData | UpdateArtistType) {
-    const currentArtist = await this.getById(artistId);
-
-    if (!("file" in data)) {
-      const { avatar_url, ...artistData } = data;
-      return this.repository.update(artistId, artistData);
+  async update(artistId: number, data: UpdateArtistType, avatarData: UploadDataType | null) {
+    const artist = await this.repository.findById(artistId);
+    if (!artist) {
+      throw new ProblemDocument(
+        404,
+        "Artist Not Found",
+        `Artist with ID ${artistId} does not exist`,
+      );
+    }
+    let avatarUrl: string | undefined;
+    if (avatarData) {
+      avatarUrl = await uploadCover(avatarData, IMAGE_FOLDERS.artistAvatars);
     }
 
-    const avatarUrl = await this.uploadAvatar(data);
-    const updatedArtist = await this.repository.update(artistId, {
-      ...data.meta,
-      avatar_url: avatarUrl,
+    const updated = await this.repository.update(artistId, {
+      ...data,
+      ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
     });
 
-    const oldKey = extractKeyFromUrl(currentArtist.avatar_url, "images");
-    if (oldKey) {
-      await deleteFile("images", oldKey);
+    if (avatarUrl) {
+      const oldKey = extractKeyFromUrl(artist.avatar_url, "images");
+      if (oldKey && artist.avatar_url !== DEFAULT_AVATAR_COVER) {
+        await deleteFile("images", oldKey);
+      }
     }
-
-    return updatedArtist;
+    return updated;
   }
 
   async delete(artistId: number): Promise<void> {

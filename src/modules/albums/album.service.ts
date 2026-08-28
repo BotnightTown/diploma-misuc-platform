@@ -9,16 +9,17 @@ import {
   uploadFile,
   validateFile,
 } from "../../utils/storage.utils.ts";
-import { AlbumUpdateUploadData, AlbumUploadData } from "../../types/album.types.ts";
+import { UploadDataType } from "../../types/upload.types.ts";
+import { DEFAULT_ALBUM_COVER } from "../../constants/DEFAULT.ts";
 
 export class AlbumService {
   constructor(private repository: AlbumRepository) {}
 
   async getAll(query: AlbumsQueryType) {
     const { page, limit } = query;
-    const { albums, total } = await this.repository.findAll(page, limit);
+    const { data, total } = await this.repository.findAll(page, limit);
     return {
-      albums,
+      data,
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     };
   }
@@ -41,7 +42,7 @@ export class AlbumService {
     };
   }
 
-  private async uploadCover(data: AlbumUploadData | AlbumUpdateUploadData): Promise<string> {
+  private async uploadCover(data: UploadDataType): Promise<string> {
     validateFile(data.contentType, data.size, "images");
 
     const key = generateStorageKey(data.filename, IMAGE_FOLDERS.albumCovers);
@@ -54,33 +55,29 @@ export class AlbumService {
     });
   }
 
-  async create(data: AlbumUploadData | CreateAlbumType) {
-    if (!("file" in data)) {
-      const { cover_url, ...albumData } = data;
-      return this.repository.create(albumData);
-    }
-
-    const coverUrl = await this.uploadCover(data);
-    return this.repository.create({ ...data.meta, cover_url: coverUrl });
+  async create(data: CreateAlbumType, coverData: UploadDataType | null) {
+    const coverUrl = coverData ? await this.uploadCover(coverData) : DEFAULT_ALBUM_COVER;
+    return this.repository.create({ ...data, cover_url: coverUrl });
   }
 
-  async update(albumId: number, data: AlbumUpdateUploadData | UpdateAlbumType) {
+  async update(albumId: number, data: UpdateAlbumType, coverData: UploadDataType | null) {
     const currentAlbum = await this.getById(albumId);
 
-    if (!("file" in data)) {
-      const { cover_url, ...albumData } = data;
-      return this.repository.update(albumId, albumData);
+    let coverUrl: string | undefined;
+    if (coverData) {
+      coverUrl = await this.uploadCover(coverData);
     }
 
-    const coverUrl = await this.uploadCover(data);
     const updatedAlbum = await this.repository.update(albumId, {
-      ...data.meta,
-      cover_url: coverUrl,
+      ...data,
+      ...(coverUrl ? { cover_url: coverUrl } : {}),
     });
 
-    const oldKey = extractKeyFromUrl(currentAlbum.cover_url, "images");
-    if (oldKey) {
-      await deleteFile("images", oldKey);
+    if (coverUrl) {
+      const oldKey = extractKeyFromUrl(currentAlbum.cover_url, "images");
+      if (oldKey && currentAlbum.cover_url !== DEFAULT_ALBUM_COVER) {
+        await deleteFile("images", oldKey);
+      }
     }
 
     return updatedAlbum;
@@ -89,7 +86,7 @@ export class AlbumService {
   async delete(albumId: number): Promise<void> {
     const album = await this.getById(albumId);
     const key = extractKeyFromUrl(album.cover_url, "images");
-    if (key) {
+    if (key && album.cover_url !== DEFAULT_ALBUM_COVER) {
       await deleteFile("images", key);
     }
     await this.repository.delete(albumId);

@@ -63,7 +63,7 @@ export class PlaylistRepository {
     return result._max.position ?? -1;
   }
 
-  async create(userId: number, data: CreatePlaylistType) {
+  async create(userId: number, data: CreatePlaylistType & { cover_url: string }) {
     return db.playlists.create({
       data: { ...data, user_id: userId },
     });

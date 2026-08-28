@@ -5,9 +5,11 @@ import { env } from "../config/env.ts";
 import crypto from "crypto";
 import path from "path";
 import { ProblemDocument } from "../models/error.model.ts";
+import { UploadDataType } from "../types/upload.types.ts";
 
 export type StorageBucket = "tracks" | "images";
-export type ImageFolder = "avatars/users" | "avatars/artists" | "covers/albums" | "covers/playlists";
+export type ImageFolder =
+  "avatars/users" | "avatars/artists" | "covers/albums" | "covers/playlists";
 
 const BUCKET_MAP: Record<StorageBucket, string> = {
   tracks: env.MINIO_BUCKET_TRACKS,
@@ -133,4 +135,20 @@ export function extractKeyFromUrl(url: string, bucket?: StorageBucket): string {
   } catch {
     return url.split("/").pop() ?? "";
   }
+}
+// Generic type for future features maybe
+export async function uploadCover<T extends UploadDataType>(
+  data: T,
+  folder: ImageFolder,
+): Promise<string> {
+  validateFile(data.contentType, data.size, "images");
+
+  const key = generateStorageKey(data.filename, folder);
+  return uploadFile({
+    bucket: "images",
+    key,
+    body: data.file,
+    contentType: data.contentType,
+    size: data.size,
+  });
 }

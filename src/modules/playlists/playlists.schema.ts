@@ -17,7 +17,6 @@ export const playlistsQuerySchema = z.object({
 export const createPlaylistSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }).max(255),
   description: z.string().max(1000).optional().default(""),
-  cover_url: z.string().optional(),
   is_public: z.coerce.boolean().optional().default(false),
 });
 

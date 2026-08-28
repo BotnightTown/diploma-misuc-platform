@@ -26,8 +26,8 @@ export class AlbumController {
 
   async getAll(request: FastifyRequest<{ Querystring: AlbumsQueryType }>, reply: FastifyReply) {
     const query = parseBody(albumsQuerySchema, request.query);
-    const result = await this.service.getAll(query);
-    return reply.status(200).send(createHateoasResponse(result, albumListLinks()));
+    const { data, pagination } = await this.service.getAll(query);
+    return reply.status(200).send(createHateoasResponse(data, albumListLinks(), pagination));
   }
 
   async getById(request: FastifyRequest<{ Params: { albumId: number } }>, reply: FastifyReply) {
@@ -47,24 +47,11 @@ export class AlbumController {
   }
 
   async create(request: FastifyRequest<{ Body: CreateAlbumType }>, reply: FastifyReply) {
-    if (!isMultipartRequest(request)) {
-      const data = parseBody(createAlbumSchema, request.body);
-      const album = await this.service.create(data);
-      return reply.status(201).send(createHateoasResponse(album, albumMutationLinks(album.id)));
-    }
+    const { fields, files } = await parseMultipartFormData(request.body as Record<string, any>);
+    const data = parseBody(createAlbumSchema, fields);
+    const coverData = files.cover ?? null; // перевір реальну назву поля файлу, яку ти використовуєш у Postman
 
-    const { file, meta } = await parseMultipartFormData(request);
-    const parsedMeta = parseBody(createAlbumSchema, meta);
-
-    const album = await this.service.create(
-      file
-        ? {
-            ...file,
-            meta: parsedMeta,
-          }
-        : parsedMeta,
-    );
-
+    const album = await this.service.create(data, coverData);
     return reply.status(201).send(createHateoasResponse(album, albumMutationLinks(album.id)));
   }
 
@@ -73,25 +60,11 @@ export class AlbumController {
     reply: FastifyReply,
   ) {
     const albumId = parseUserId(request.params.albumId);
+    const { fields, files } = await parseMultipartFormData(request.body as Record<string, any>);
+    const data = parseBody(updateAlbumSchema, fields);
+    const coverData = files.cover ?? null;
 
-    if (!isMultipartRequest(request)) {
-      const data = parseBody(updateAlbumSchema, request.body);
-      const album = await this.service.update(albumId, data);
-      return reply.status(200).send(createHateoasResponse(album, albumMutationLinks(albumId)));
-    }
-
-    const { file, meta } = await parseMultipartFormData(request);
-    const parsedMeta = parseBody(updateAlbumSchema, meta);
-    const album = await this.service.update(
-      albumId,
-      file
-        ? {
-            ...file,
-            meta: parsedMeta,
-          }
-        : parsedMeta,
-    );
-
+    const album = await this.service.update(albumId, data, coverData);
     return reply.status(200).send(createHateoasResponse(album, albumMutationLinks(albumId)));
   }
 

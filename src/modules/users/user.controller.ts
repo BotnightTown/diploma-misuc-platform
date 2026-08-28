@@ -7,6 +7,7 @@ import {
   ChangePasswordType,
   followSchema,
   FollowType,
+  paginationSchema,
   updateBioSchema,
   UpdateBioType,
   updateUsernameSchema,
@@ -20,6 +21,8 @@ import {
 } from "../../utils/controller.utils.ts";
 import {
   createHateoasResponse,
+  followersLinks,
+  followingLinks,
   userMutationLinks,
   userProfileLinks,
 } from "../../utils/hateoas.utils.ts";
@@ -106,16 +109,58 @@ export class UserController {
     return reply.status(204).send();
   }
 
-  async getFollowers(request: FastifyRequest<{ Params: { userId: number } }>, reply: FastifyReply) {
+  async getFollowers(
+    request: FastifyRequest<{
+      Params: { userId: number };
+      Querystring: { page?: number; limit?: number };
+    }>,
+    reply: FastifyReply,
+  ) {
     const userId = parseUserId(request.params.userId);
-    const followers = await this.service.getFollowers(userId);
-    return reply.status(200).send(createHateoasResponse(followers, userProfileLinks(userId)));
+    const { page, limit } = paginationSchema.parse(request.query);
+
+    const { data, total } = await this.service.getFollowers(userId, { page, limit });
+    const totalPages = Math.ceil(total / limit);
+
+    return reply.status(200).send(
+      createHateoasResponse(
+        data,
+        followersLinks(userId, page, totalPages) as Parameters<typeof createHateoasResponse>[1],
+        {
+          total,
+          page,
+          limit,
+          totalPages,
+        },
+      ),
+    );
   }
 
-  async getFollowing(request: FastifyRequest<{ Params: { userId: number } }>, reply: FastifyReply) {
+  async getFollowing(
+    request: FastifyRequest<{
+      Params: { userId: number };
+      Querystring: { page?: number; limit?: number };
+    }>,
+    reply: FastifyReply,
+  ) {
     const userId = parseUserId(request.params.userId);
-    const following = await this.service.getFollowing(userId);
-    return reply.status(200).send(createHateoasResponse(following, userProfileLinks(userId)));
+    const { page, limit } = paginationSchema.parse(request.query);
+
+    const { data, total } = await this.service.getFollowing(userId, { page, limit });
+    const totalPages = Math.ceil(total / limit);
+
+    return reply.status(200).send(
+      createHateoasResponse(
+        data,
+        followingLinks(userId, page, totalPages) as Parameters<typeof createHateoasResponse>[1],
+        {
+          total,
+          page,
+          limit,
+          totalPages,
+        },
+      ),
+    );
   }
 
   async followUser(

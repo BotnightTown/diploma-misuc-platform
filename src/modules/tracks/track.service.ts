@@ -1,5 +1,11 @@
 import { TrackRepository } from "./track.repository.ts";
-import { CreateReviewType, TracksQueryType, UpdateTrackType } from "./track.schema.ts";
+import {
+  CreateReviewType,
+  CreateTrackFormType,
+  CreateTrackType,
+  TracksQueryType,
+  UpdateTrackType,
+} from "./track.schema.ts";
 import { ProblemDocument } from "../../models/error.model.ts";
 import {
   deleteFile,
@@ -8,7 +14,7 @@ import {
   uploadFile,
   validateFile,
 } from "../../utils/storage.utils.ts";
-import { TrackUpdateUploadData, TrackUploadData } from "../../types/tracks.types.ts";
+import { UploadDataType } from "../../types/upload.types.ts";
 
 export class TrackService {
   constructor(private repository: TrackRepository) {}
@@ -34,7 +40,7 @@ export class TrackService {
     return track;
   }
 
-  private async uploadAudio(data: TrackUploadData | TrackUpdateUploadData): Promise<string> {
+  private async uploadAudio(data: UploadDataType): Promise<string> {
     validateFile(data.contentType, data.size, "tracks");
 
     const key = generateStorageKey(data.filename);
@@ -47,27 +53,29 @@ export class TrackService {
     });
   }
 
-  async create(data: TrackUploadData) {
-    const audioUrl = await this.uploadAudio(data);
-    return this.repository.create({ ...data.meta, audio_url: audioUrl });
+  async create(data: CreateTrackFormType, audioData: UploadDataType) {
+    const audioUrl = await this.uploadAudio(audioData);
+    return this.repository.create({ ...data, audio_url: audioUrl });
   }
 
-  async update(trackId: number, data: TrackUpdateUploadData | UpdateTrackType) {
+  async update(trackId: number, data: UpdateTrackType, audioData: UploadDataType | null) {
     const currentTrack = await this.getById(trackId);
 
-    if (!("file" in data)) {
-      return this.repository.update(trackId, data);
+    let audioUrl: string | undefined;
+    if (audioData) {
+      audioUrl = await this.uploadAudio(audioData);
     }
 
-    const audioUrl = await this.uploadAudio(data);
     const updatedTrack = await this.repository.update(trackId, {
-      ...data.meta,
-      audio_url: audioUrl,
+      ...data,
+      ...(audioUrl ? { audio_url: audioUrl } : {}),
     });
 
-    const oldKey = extractKeyFromUrl(currentTrack.audio_url, "tracks");
-    if (oldKey) {
-      await deleteFile("tracks", oldKey);
+    if (audioUrl) {
+      const oldKey = extractKeyFromUrl(currentTrack.audio_url, "tracks");
+      if (oldKey) {
+        await deleteFile("tracks", oldKey);
+      }
     }
 
     return updatedTrack;

@@ -33,3 +33,27 @@ export async function authenticate(request: FastifyRequest, reply: FastifyReply)
 
   request.user = payload;
 }
+
+export async function authenticateWs(
+  req: FastifyRequest<{ Querystring: { token?: string } }>,
+  reply: FastifyReply,
+) {
+  const token = req.query.token ?? req.headers.authorization?.replace("Bearer ", "");
+  if (!token) {
+    throw new ProblemDocument(401, "Unauthorized", "Missing access token");
+  }
+  let payload: TokenPayload;
+  try {
+    const result = verifyAccessToken(token as string) as any;
+    payload = result instanceof Promise ? await result : result;
+  } catch {
+    throw new ProblemDocument(401, "Unauthorized", "Access token is invalid or expired");
+  }
+
+  const isBlacklisted = await redis.get(`blacklist:${payload.jti}`);
+  if (isBlacklisted) {
+    throw new ProblemDocument(401, "Unauthorized", "Access token has been revoked");
+  }
+
+  req.user = payload;
+}

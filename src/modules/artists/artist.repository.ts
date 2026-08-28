@@ -4,11 +4,11 @@ import { CreateArtistType, UpdateArtistType } from "./artist.schema.ts";
 export class ArtistRepository {
   async findAll(page: number, limit: number) {
     const offset = (page - 1) * limit;
-    const [artists, total] = await Promise.all([
+    const [data, total] = await Promise.all([
       db.artists.findMany({ skip: offset, take: limit, orderBy: { name: "asc" } }),
       db.artists.count(),
     ]);
-    return { artists, total };
+    return { data, total };
   }
 
   async findById(id: number) {
@@ -23,7 +23,7 @@ export class ArtistRepository {
     return db.tracks.findMany({ where: { artist_id: artistId }, orderBy: { title: "asc" } });
   }
 
-  async create(data: CreateArtistType) {
+  async create(data: CreateArtistType & { avatar_url: string }) {
     return db.artists.create({ data });
   }
 

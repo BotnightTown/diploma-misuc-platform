@@ -1,6 +1,7 @@
 import { FastifyRequest } from "fastify";
 import { ZodSchema } from "zod";
 import { ProblemDocument } from "../models/error.model.ts";
+import { ParsedMultipart } from "../types/upload.types.ts";
 
 export interface UploadedFileData {
   file: Buffer;
@@ -37,34 +38,29 @@ export function isMultipartRequest(request: FastifyRequest): boolean {
   return multipartRequest.isMultipart?.() ?? false;
 }
 
-export async function parseMultipartFormData(
-  request: FastifyRequest,
-): Promise<{ file: UploadedFileData | null; meta: Record<string, unknown> }> {
-  const parts = request.parts();
+export async function parseMultipartFormData(body: Record<string, any>): Promise<ParsedMultipart> {
+  const fields: Record<string, string> = {};
+  const files: Record<string, UploadedFileData> = {};
 
-  let file: UploadedFileData | null = null;
-  const meta: Record<string, unknown> = {};
+  for (const [key, part] of Object.entries(body ?? {})) {
+    const isRealFile = part?.type === "file" && part.filename;
 
-  for await (const part of parts) {
-    if (part.type === "file") {
-      const chunks: Buffer[] = [];
-      for await (const chunk of part.file) {
-        chunks.push(chunk);
-      }
-
-      const buffer = Buffer.concat(chunks);
-      file = {
+    if (isRealFile) {
+      const buffer = await part.toBuffer();
+      files[key] = {
         file: buffer,
         filename: part.filename,
         contentType: part.mimetype,
         size: buffer.length,
       };
-    } else {
-      meta[part.fieldname] = part.value;
+    } else if (part?.type === "field" || part?.type === "file") {
+      // текстове поле, або "файл" без імені (Postman-квірк) — обидва трактуємо як текст
+      const value = part.type === "file" ? (await part.toBuffer()).toString("utf-8") : part.value;
+      fields[key] = value;
     }
   }
 
-  return { file, meta };
+  return { fields, files };
 }
 
 export function assertSelfOrForbidden(request: FastifyRequest, targetUserId: number) {

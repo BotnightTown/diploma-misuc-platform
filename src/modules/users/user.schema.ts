@@ -31,6 +31,11 @@ export const followSchema = z.object({
   followingId: z.number().int().positive(),
 });
 
+export const paginationSchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(100).default(20),
+});
+
 export type UpdateUsernameType = z.infer<typeof updateUsernameSchema>;
 export type UpdateBioType = z.infer<typeof updateBioSchema>;
 export type ChangePasswordType = z.infer<typeof changePasswordSchema>;

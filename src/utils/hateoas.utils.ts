@@ -1,5 +1,3 @@
-// src/utils/hateoas.utils.ts
-
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 export interface HateoasLink {
@@ -34,20 +32,69 @@ export function createHateoasResponse<T, M>(data: T, links: HateoasLink[], meta?
 
 export function userProfileLinks(userId: number): HateoasLink[] {
   return [
-    { rel: "self", href: `/api/user/${userId}`, method: "GET" },
-    { rel: "update-username", href: `/api/user/${userId}/username`, method: "PATCH" },
-    { rel: "update-bio", href: `/api/user/${userId}/bio`, method: "PATCH" },
-    { rel: "change-email", href: `/api/user/${userId}/email`, method: "PATCH" },
-    { rel: "change-password", href: `/api/user/${userId}/password`, method: "PATCH" },
-    { rel: "delete", href: `/api/user/${userId}`, method: "DELETE" },
+    { rel: "self", href: `/api/users/${userId}`, method: "GET" },
+    { rel: "update-username", href: `/api/users/${userId}/username`, method: "PATCH" },
+    { rel: "update-bio", href: `/api/users/${userId}/bio`, method: "PATCH" },
+    { rel: "change-email", href: `/api/users/${userId}/email`, method: "PATCH" },
+    { rel: "change-password", href: `/api/users/${userId}/password`, method: "PATCH" },
+    { rel: "delete", href: `/api/users/${userId}`, method: "DELETE" },
+    { rel: "playlists", href: `/api/users/${userId}/playlists`, method: "GET" },
   ];
 }
 
 export function userMutationLinks(userId: number): HateoasLink[] {
   return [
-    { rel: "profile", href: `/api/user/${userId}`, method: "GET" },
-    { rel: "self", href: `/api/user/${userId}`, method: "PATCH" },
+    { rel: "profile", href: `/api/users/${userId}`, method: "GET" },
+    { rel: "self", href: `/api/users/${userId}`, method: "PATCH" },
   ];
+}
+
+export function followersLinks(userId: number, page: number, totalPages: number) {
+  const links = [
+    { rel: "self", href: `/api/users/${userId}/followers?page=${page}`, method: "GET" },
+    { rel: "user", href: `/api/users/${userId}`, method: "GET" },
+  ];
+
+  if (page > 1) {
+    links.push({
+      rel: "prev",
+      href: `/api/users/${userId}/followers?page=${page - 1}`,
+      method: "GET",
+    });
+  }
+  if (page < totalPages) {
+    links.push({
+      rel: "next",
+      href: `/api/users/${userId}/followers?page=${page + 1}`,
+      method: "GET",
+    });
+  }
+
+  return links;
+}
+
+export function followingLinks(userId: number, page: number, totalPages: number) {
+  const links = [
+    { rel: "self", href: `/api/users/${userId}/following?page=${page}`, method: "GET" },
+    { rel: "user", href: `/api/users/${userId}`, method: "GET" },
+  ];
+
+  if (page > 1) {
+    links.push({
+      rel: "prev",
+      href: `/api/users/${userId}/following?page=${page - 1}`,
+      method: "GET",
+    });
+  }
+  if (page < totalPages) {
+    links.push({
+      rel: "next",
+      href: `/api/users/${userId}/following?page=${page + 1}`,
+      method: "GET",
+    });
+  }
+
+  return links;
 }
 
 // --- Auth links ---
@@ -66,7 +113,7 @@ export function registerLinks(): HateoasLink[] {
 
 export function loginLinks(userId: number): HateoasLink[] {
   return [
-    { rel: "profile", href: `/api/user/${userId}`, method: "GET" },
+    { rel: "profile", href: `/api/users/${userId}`, method: "GET" },
     { rel: "logout", href: "/api/auth/logout", method: "POST" },
     { rel: "refresh", href: "/api/auth/refresh", method: "POST" },
   ];
@@ -210,5 +257,42 @@ export function userPlaylistsLinks(userId: number): HateoasLink[] {
   return [
     { rel: "self", href: `/api/users/${userId}/playlists`, method: "GET" },
     { rel: "user", href: `/api/users/${userId}`, method: "GET" },
+  ];
+}
+
+// --- Room links ---
+
+export function roomLinks(roomId: number, hostId: number, currentUserId?: number): HateoasLink[] {
+  const links: HateoasLink[] = [
+    { rel: "self", href: `/api/rooms/${roomId}`, method: "GET" },
+    { rel: "messages", href: `/api/rooms/${roomId}/messages`, method: "POST" },
+    { rel: "queue", href: `/api/rooms/${roomId}/queue`, method: "POST" },
+    { rel: "ws", href: `/api/rooms/${roomId}/ws`, method: "GET" },
+  ];
+
+  if (currentUserId === hostId) {
+    links.push(
+      { rel: "update", href: `/api/rooms/${roomId}`, method: "PATCH" },
+      { rel: "close", href: `/api/rooms/${roomId}`, method: "DELETE" },
+    );
+  } else {
+    links.push({ rel: "join", href: `/api/rooms/${roomId}/participants`, method: "POST" });
+  }
+
+  return links;
+}
+
+export function roomMutationLinks(roomId: number): HateoasLink[] {
+  return [{ rel: "room", href: `/api/rooms/${roomId}`, method: "GET" }];
+}
+
+export function roomListLinks(): HateoasLink[] {
+  return [{ rel: "self", href: `/api/rooms`, method: "GET" }];
+}
+
+export function roomParticipantLinks(roomId: number): HateoasLink[] {
+  return [
+    { rel: "room", href: `/api/rooms/${roomId}`, method: "GET" },
+    { rel: "leave", href: `/api/rooms/${roomId}/participants`, method: "DELETE" },
   ];
 }

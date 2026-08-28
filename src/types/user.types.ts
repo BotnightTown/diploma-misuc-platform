@@ -1,3 +1,5 @@
+import { email } from "zod";
+
 export type UserType = {
   id: number;
   username: string;
@@ -11,7 +13,10 @@ export type UserType = {
   is_verified: boolean;
 };
 
-export type PublicUser = Pick<UserType, "id" | "username" | "email" | "avatar_url">;
+export type PublicUser = Pick<
+  UserType,
+  "id" | "username" | "email" | "avatar_url" | "bio" | "role" | "is_verified" | "created_at"
+>;
 
 export interface UserAvatarUploadData {
   file: Buffer;
@@ -21,3 +26,24 @@ export interface UserAvatarUploadData {
 }
 
 export type AuthenticatedUser = Omit<UserType, "password_hash">;
+
+export interface PaginationParams {
+  page: number;
+  limit: number;
+}
+
+export interface PaginatedResult<T> {
+  data: T[];
+  total: number;
+}
+
+export const PUBLIC_USER_SELECT = {
+  id: true,
+  email: true,
+  username: true,
+  avatar_url: true,
+  bio: true,
+  role: true,
+  is_verified: true,
+  created_at: true,
+};

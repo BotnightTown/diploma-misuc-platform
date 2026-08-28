@@ -1,5 +1,11 @@
 import { db } from "../../config/db.ts";
-import { UserType } from "../../types/user.types.ts";
+import {
+  PaginatedResult,
+  PaginationParams,
+  PUBLIC_USER_SELECT,
+  PublicUser,
+  UserType,
+} from "../../types/user.types.ts";
 import { UpdateUsernameType, UpdateBioType } from "./user.schema.ts";
 
 type UpdatePayload = Partial<
@@ -31,24 +37,50 @@ export class UserRepository {
     await db.users.delete({ where: { id } });
   }
 
-  async findFollowers(id: number): Promise<UserType[]> {
-    return db.users.findMany({
-      where: {
-        user_follows_user_follows_follower_idTousers: {
-          some: { following_id: id },
-        },
+  async findFollowers(
+    id: number,
+    { page, limit }: PaginationParams,
+  ): Promise<PaginatedResult<PublicUser>> {
+    const where = {
+      user_follows_user_follows_follower_idTousers: {
+        some: { following_id: id },
       },
-    });
+    };
+
+    const [data, total] = await Promise.all([
+      db.users.findMany({
+        where,
+        select: PUBLIC_USER_SELECT,
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      db.users.count({ where }),
+    ]);
+
+    return { data, total };
   }
 
-  async findFollowing(id: number): Promise<UserType[]> {
-    return db.users.findMany({
-      where: {
-        user_follows_user_follows_following_idTousers: {
-          some: { follower_id: id },
-        },
+  async findFollowing(
+    id: number,
+    { page, limit }: PaginationParams,
+  ): Promise<PaginatedResult<PublicUser>> {
+    const where = {
+      user_follows_user_follows_following_idTousers: {
+        some: { follower_id: id },
       },
-    });
+    };
+
+    const [data, total] = await Promise.all([
+      db.users.findMany({
+        where,
+        select: PUBLIC_USER_SELECT,
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      db.users.count({ where }),
+    ]);
+
+    return { data, total };
   }
 
   async createFollow(followerId: number, followingId: number): Promise<void> {

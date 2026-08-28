@@ -9,12 +9,7 @@ import {
   updateTrackSchema,
   UpdateTrackType,
 } from "./track.schema.ts";
-import {
-  isMultipartRequest,
-  parseBody,
-  parseMultipartFormData,
-  parseUserId,
-} from "../../utils/controller.utils.ts";
+import { parseBody, parseMultipartFormData, parseUserId } from "../../utils/controller.utils.ts";
 import {
   createHateoasResponse,
   reviewLinks,
@@ -43,22 +38,15 @@ export class TrackController {
   }
 
   async create(request: FastifyRequest, reply: FastifyReply) {
-    if (!isMultipartRequest(request)) {
+    const { fields, files } = await parseMultipartFormData(request.body as Record<string, any>);
+
+    const data = parseBody(createTrackSchema, fields);
+    const audioData = files.track ?? null;
+    if (!audioData) {
       throw new ProblemDocument(400, "Bad Request", "Audio file is required");
     }
 
-    const { file, meta } = await parseMultipartFormData(request);
-
-    if (!file) {
-      throw new ProblemDocument(400, "Bad Request", "Audio file is required");
-    }
-
-    const parsedMeta = parseBody(createTrackSchema, meta);
-
-    const track = await this.service.create({
-      ...file,
-      meta: parsedMeta,
-    });
+    const track = await this.service.create(data, audioData);
 
     return reply
       .status(201)
@@ -70,26 +58,12 @@ export class TrackController {
     reply: FastifyReply,
   ) {
     const trackId = parseUserId(request.params.trackId);
+    const { fields, files } = await parseMultipartFormData(request.body as Record<string, any>);
 
-    if (!isMultipartRequest(request)) {
-      const data = parseBody(updateTrackSchema, request.body);
-      const track = await this.service.update(trackId, data);
-      return reply
-        .status(200)
-        .send(createHateoasResponse(track, trackMutationLinks(trackId, track.album_id)));
-    }
+    const data = parseBody(updateTrackSchema, fields);
+    const audioData = files.track ?? null;
 
-    const { file, meta } = await parseMultipartFormData(request);
-    const parsedMeta = parseBody(updateTrackSchema, meta);
-    const track = await this.service.update(
-      trackId,
-      file
-        ? {
-            ...file,
-            meta: parsedMeta,
-          }
-        : parsedMeta,
-    );
+    const track = await this.service.update(trackId, data, audioData);
 
     return reply
       .status(200)

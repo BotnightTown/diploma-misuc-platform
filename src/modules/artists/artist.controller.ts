@@ -27,8 +27,8 @@ export class ArtistController {
 
   async getAll(request: FastifyRequest<{ Querystring: ArtistsQueryType }>, reply: FastifyReply) {
     const query = parseBody(artistsQuerySchema, request.query);
-    const result = await this.service.getAll(query);
-    return reply.status(200).send(createHateoasResponse(result, artistListLinks()));
+    const { data, pagination } = await this.service.getAll(query);
+    return reply.status(200).send(createHateoasResponse(data, artistListLinks(), pagination));
   }
 
   async getById(request: FastifyRequest<{ Params: { artistId: number } }>, reply: FastifyReply) {
@@ -50,24 +50,12 @@ export class ArtistController {
   }
 
   async create(request: FastifyRequest<{ Body: CreateArtistType }>, reply: FastifyReply) {
-    if (!isMultipartRequest(request)) {
-      const data = parseBody(createArtistSchema, request.body);
-      const artist = await this.service.create(data);
-      return reply.status(201).send(createHateoasResponse(artist, artistMutationLinks(artist.id)));
-    }
+    const { fields, files } = await parseMultipartFormData(request.body as Record<string, any>);
 
-    const { file, meta } = await parseMultipartFormData(request);
-    const parsedMeta = parseBody(createArtistSchema, meta);
+    const data = parseBody(createArtistSchema, fields);
+    const avatarData = files.avatar ?? null;
 
-    const artist = await this.service.create(
-      file
-        ? {
-            ...file,
-            meta: parsedMeta,
-          }
-        : parsedMeta,
-    );
-
+    const artist = await this.service.create(data, avatarData);
     return reply.status(201).send(createHateoasResponse(artist, artistMutationLinks(artist.id)));
   }
 
@@ -76,24 +64,12 @@ export class ArtistController {
     reply: FastifyReply,
   ) {
     const artistId = parseUserId(request.params.artistId);
+    const { fields, files } = await parseMultipartFormData(request.body as Record<string, any>);
 
-    if (!isMultipartRequest(request)) {
-      const data = parseBody(updateArtistSchema, request.body);
-      const artist = await this.service.update(artistId, data);
-      return reply.status(200).send(createHateoasResponse(artist, artistMutationLinks(artistId)));
-    }
+    const data = parseBody(updateArtistSchema, fields);
+    const avatarData = files.avatar ?? null;
 
-    const { file, meta } = await parseMultipartFormData(request);
-    const parsedMeta = parseBody(updateArtistSchema, meta);
-    const artist = await this.service.update(
-      artistId,
-      file
-        ? {
-            ...file,
-            meta: parsedMeta,
-          }
-        : parsedMeta,
-    );
+    const artist = await this.service.update(artistId, data, avatarData);
 
     return reply.status(200).send(createHateoasResponse(artist, artistMutationLinks(artistId)));
   }

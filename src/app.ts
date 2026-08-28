@@ -9,6 +9,7 @@ import { db } from "./config/db.ts";
 import { redis } from "./config/redis.ts";
 import { apiRoutes } from "./routes.ts";
 import { initStorage } from "./config/storage.ts";
+import websocket from "@fastify/websocket";
 
 const app = Fastify({
   logger: env.NODE_ENV === "development",
@@ -26,7 +27,9 @@ await app.register(multipart, {
   limits: {
     fileSize: 50 * 1024 * 1024,
   },
+  attachFieldsToBody: true,
 });
+await app.register(websocket);
 
 await app.register(apiRoutes, { prefix: "/api" });
 

@@ -1,10 +1,10 @@
 import { FastifyRequest, FastifyReply } from "fastify";
+import { MultipartFile } from "@fastify/multipart";
 import { PlaylistService } from "./playlists.service.ts";
 import {
   playlistsQuerySchema,
   PlaylistsQueryType,
   createPlaylistSchema,
-  CreatePlaylistType,
   updatePlaylistSchema,
   UpdatePlaylistType,
   addTrackToPlaylistSchema,
@@ -12,7 +12,7 @@ import {
   reorderPlaylistTracksSchema,
   ReorderPlaylistTracksType,
 } from "./playlists.schema.ts";
-import { parseBody, parseUserId } from "../../utils/controller.utils.ts";
+import { parseBody, parseMultipartFormData, parseUserId } from "../../utils/controller.utils.ts";
 import {
   createHateoasResponse,
   playlistListLinks,
@@ -58,21 +58,26 @@ export class PlaylistController {
     return reply.status(200).send(createHateoasResponse(result, playlistLinks(playlistId)));
   }
 
-  async create(request: FastifyRequest<{ Body: CreatePlaylistType }>, reply: FastifyReply) {
-    const data = parseBody(createPlaylistSchema, request.body);
-    const playlist = await this.service.create(request.user.sub, data);
+  async create(request: FastifyRequest, reply: FastifyReply) {
+    const { fields, files } = await parseMultipartFormData(request.body as Record<string, any>);
+
+    const data = parseBody(createPlaylistSchema, fields);
+    const coverData = files.cover ?? null;
+
+    const playlist = await this.service.create(request.user.sub, data, coverData);
     return reply
       .status(201)
       .send(createHateoasResponse(playlist, playlistMutationLinks(playlist.id)));
   }
 
-  async update(
-    request: FastifyRequest<{ Params: { playlistId: number }; Body: UpdatePlaylistType }>,
-    reply: FastifyReply,
-  ) {
+  async update(request: FastifyRequest<{ Params: { playlistId: number } }>, reply: FastifyReply) {
     const playlistId = parseUserId(request.params.playlistId);
-    const data = parseBody(updatePlaylistSchema, request.body);
-    const playlist = await this.service.update(playlistId, request.user.sub, data);
+    const { fields, files } = await parseMultipartFormData(request.body as Record<string, any>);
+
+    const data = parseBody(updatePlaylistSchema, fields);
+    const coverData = files.cover ?? null;
+
+    const playlist = await this.service.update(playlistId, request.user.sub, data, coverData);
     return reply
       .status(200)
       .send(createHateoasResponse(playlist, playlistMutationLinks(playlistId)));
