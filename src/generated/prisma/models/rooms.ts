@@ -30,12 +30,14 @@ export type RoomsAvgAggregateOutputType = {
   id: number | null
   host_id: number | null
   max_participants: number | null
+  vote_threshold: number | null
 }
 
 export type RoomsSumAggregateOutputType = {
   id: number | null
   host_id: number | null
   max_participants: number | null
+  vote_threshold: number | null
 }
 
 export type RoomsMinAggregateOutputType = {
@@ -45,6 +47,12 @@ export type RoomsMinAggregateOutputType = {
   description: string | null
   is_active: boolean | null
   max_participants: number | null
+  cover_url: string | null
+  is_public: boolean | null
+  queue_permission: string | null
+  skip_mode: string | null
+  vote_threshold: number | null
+  allow_chat: boolean | null
   created_at: Date | null
   closed_at: Date | null
 }
@@ -56,6 +64,12 @@ export type RoomsMaxAggregateOutputType = {
   description: string | null
   is_active: boolean | null
   max_participants: number | null
+  cover_url: string | null
+  is_public: boolean | null
+  queue_permission: string | null
+  skip_mode: string | null
+  vote_threshold: number | null
+  allow_chat: boolean | null
   created_at: Date | null
   closed_at: Date | null
 }
@@ -67,6 +81,13 @@ export type RoomsCountAggregateOutputType = {
   description: number
   is_active: number
   max_participants: number
+  cover_url: number
+  is_public: number
+  genres: number
+  queue_permission: number
+  skip_mode: number
+  vote_threshold: number
+  allow_chat: number
   created_at: number
   closed_at: number
   _all: number
@@ -77,12 +98,14 @@ export type RoomsAvgAggregateInputType = {
   id?: true
   host_id?: true
   max_participants?: true
+  vote_threshold?: true
 }
 
 export type RoomsSumAggregateInputType = {
   id?: true
   host_id?: true
   max_participants?: true
+  vote_threshold?: true
 }
 
 export type RoomsMinAggregateInputType = {
@@ -92,6 +115,12 @@ export type RoomsMinAggregateInputType = {
   description?: true
   is_active?: true
   max_participants?: true
+  cover_url?: true
+  is_public?: true
+  queue_permission?: true
+  skip_mode?: true
+  vote_threshold?: true
+  allow_chat?: true
   created_at?: true
   closed_at?: true
 }
@@ -103,6 +132,12 @@ export type RoomsMaxAggregateInputType = {
   description?: true
   is_active?: true
   max_participants?: true
+  cover_url?: true
+  is_public?: true
+  queue_permission?: true
+  skip_mode?: true
+  vote_threshold?: true
+  allow_chat?: true
   created_at?: true
   closed_at?: true
 }
@@ -114,6 +149,13 @@ export type RoomsCountAggregateInputType = {
   description?: true
   is_active?: true
   max_participants?: true
+  cover_url?: true
+  is_public?: true
+  genres?: true
+  queue_permission?: true
+  skip_mode?: true
+  vote_threshold?: true
+  allow_chat?: true
   created_at?: true
   closed_at?: true
   _all?: true
@@ -212,6 +254,13 @@ export type RoomsGroupByOutputType = {
   description: string
   is_active: boolean
   max_participants: number
+  cover_url: string
+  is_public: boolean
+  genres: string[]
+  queue_permission: string
+  skip_mode: string
+  vote_threshold: number
+  allow_chat: boolean
   created_at: Date
   closed_at: Date | null
   _count: RoomsCountAggregateOutputType | null
@@ -246,6 +295,13 @@ export type roomsWhereInput = {
   description?: Prisma.StringFilter<"rooms"> | string
   is_active?: Prisma.BoolFilter<"rooms"> | boolean
   max_participants?: Prisma.IntFilter<"rooms"> | number
+  cover_url?: Prisma.StringFilter<"rooms"> | string
+  is_public?: Prisma.BoolFilter<"rooms"> | boolean
+  genres?: Prisma.StringNullableListFilter<"rooms">
+  queue_permission?: Prisma.StringFilter<"rooms"> | string
+  skip_mode?: Prisma.StringFilter<"rooms"> | string
+  vote_threshold?: Prisma.IntFilter<"rooms"> | number
+  allow_chat?: Prisma.BoolFilter<"rooms"> | boolean
   created_at?: Prisma.DateTimeFilter<"rooms"> | Date | string
   closed_at?: Prisma.DateTimeNullableFilter<"rooms"> | Date | string | null
   room_messages?: Prisma.Room_messagesListRelationFilter
@@ -262,6 +318,13 @@ export type roomsOrderByWithRelationInput = {
   description?: Prisma.SortOrder
   is_active?: Prisma.SortOrder
   max_participants?: Prisma.SortOrder
+  cover_url?: Prisma.SortOrder
+  is_public?: Prisma.SortOrder
+  genres?: Prisma.SortOrder
+  queue_permission?: Prisma.SortOrder
+  skip_mode?: Prisma.SortOrder
+  vote_threshold?: Prisma.SortOrder
+  allow_chat?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   closed_at?: Prisma.SortOrderInput | Prisma.SortOrder
   room_messages?: Prisma.room_messagesOrderByRelationAggregateInput
@@ -281,6 +344,13 @@ export type roomsWhereUniqueInput = Prisma.AtLeast<{
   description?: Prisma.StringFilter<"rooms"> | string
   is_active?: Prisma.BoolFilter<"rooms"> | boolean
   max_participants?: Prisma.IntFilter<"rooms"> | number
+  cover_url?: Prisma.StringFilter<"rooms"> | string
+  is_public?: Prisma.BoolFilter<"rooms"> | boolean
+  genres?: Prisma.StringNullableListFilter<"rooms">
+  queue_permission?: Prisma.StringFilter<"rooms"> | string
+  skip_mode?: Prisma.StringFilter<"rooms"> | string
+  vote_threshold?: Prisma.IntFilter<"rooms"> | number
+  allow_chat?: Prisma.BoolFilter<"rooms"> | boolean
   created_at?: Prisma.DateTimeFilter<"rooms"> | Date | string
   closed_at?: Prisma.DateTimeNullableFilter<"rooms"> | Date | string | null
   room_messages?: Prisma.Room_messagesListRelationFilter
@@ -297,6 +367,13 @@ export type roomsOrderByWithAggregationInput = {
   description?: Prisma.SortOrder
   is_active?: Prisma.SortOrder
   max_participants?: Prisma.SortOrder
+  cover_url?: Prisma.SortOrder
+  is_public?: Prisma.SortOrder
+  genres?: Prisma.SortOrder
+  queue_permission?: Prisma.SortOrder
+  skip_mode?: Prisma.SortOrder
+  vote_threshold?: Prisma.SortOrder
+  allow_chat?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   closed_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.roomsCountOrderByAggregateInput
@@ -316,6 +393,13 @@ export type roomsScalarWhereWithAggregatesInput = {
   description?: Prisma.StringWithAggregatesFilter<"rooms"> | string
   is_active?: Prisma.BoolWithAggregatesFilter<"rooms"> | boolean
   max_participants?: Prisma.IntWithAggregatesFilter<"rooms"> | number
+  cover_url?: Prisma.StringWithAggregatesFilter<"rooms"> | string
+  is_public?: Prisma.BoolWithAggregatesFilter<"rooms"> | boolean
+  genres?: Prisma.StringNullableListFilter<"rooms">
+  queue_permission?: Prisma.StringWithAggregatesFilter<"rooms"> | string
+  skip_mode?: Prisma.StringWithAggregatesFilter<"rooms"> | string
+  vote_threshold?: Prisma.IntWithAggregatesFilter<"rooms"> | number
+  allow_chat?: Prisma.BoolWithAggregatesFilter<"rooms"> | boolean
   created_at?: Prisma.DateTimeWithAggregatesFilter<"rooms"> | Date | string
   closed_at?: Prisma.DateTimeNullableWithAggregatesFilter<"rooms"> | Date | string | null
 }
@@ -325,6 +409,13 @@ export type roomsCreateInput = {
   description?: string
   is_active?: boolean
   max_participants: number
+  cover_url?: string
+  is_public?: boolean
+  genres?: Prisma.roomsCreategenresInput | string[]
+  queue_permission?: string
+  skip_mode?: string
+  vote_threshold?: number
+  allow_chat?: boolean
   created_at?: Date | string
   closed_at?: Date | string | null
   room_messages?: Prisma.room_messagesCreateNestedManyWithoutRoomsInput
@@ -341,6 +432,13 @@ export type roomsUncheckedCreateInput = {
   description?: string
   is_active?: boolean
   max_participants: number
+  cover_url?: string
+  is_public?: boolean
+  genres?: Prisma.roomsCreategenresInput | string[]
+  queue_permission?: string
+  skip_mode?: string
+  vote_threshold?: number
+  allow_chat?: boolean
   created_at?: Date | string
   closed_at?: Date | string | null
   room_messages?: Prisma.room_messagesUncheckedCreateNestedManyWithoutRoomsInput
@@ -354,6 +452,13 @@ export type roomsUpdateInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   max_participants?: Prisma.IntFieldUpdateOperationsInput | number
+  cover_url?: Prisma.StringFieldUpdateOperationsInput | string
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  genres?: Prisma.roomsUpdategenresInput | string[]
+  queue_permission?: Prisma.StringFieldUpdateOperationsInput | string
+  skip_mode?: Prisma.StringFieldUpdateOperationsInput | string
+  vote_threshold?: Prisma.IntFieldUpdateOperationsInput | number
+  allow_chat?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   room_messages?: Prisma.room_messagesUpdateManyWithoutRoomsNestedInput
@@ -370,6 +475,13 @@ export type roomsUncheckedUpdateInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   max_participants?: Prisma.IntFieldUpdateOperationsInput | number
+  cover_url?: Prisma.StringFieldUpdateOperationsInput | string
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  genres?: Prisma.roomsUpdategenresInput | string[]
+  queue_permission?: Prisma.StringFieldUpdateOperationsInput | string
+  skip_mode?: Prisma.StringFieldUpdateOperationsInput | string
+  vote_threshold?: Prisma.IntFieldUpdateOperationsInput | number
+  allow_chat?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   room_messages?: Prisma.room_messagesUncheckedUpdateManyWithoutRoomsNestedInput
@@ -385,6 +497,13 @@ export type roomsCreateManyInput = {
   description?: string
   is_active?: boolean
   max_participants: number
+  cover_url?: string
+  is_public?: boolean
+  genres?: Prisma.roomsCreategenresInput | string[]
+  queue_permission?: string
+  skip_mode?: string
+  vote_threshold?: number
+  allow_chat?: boolean
   created_at?: Date | string
   closed_at?: Date | string | null
 }
@@ -394,6 +513,13 @@ export type roomsUpdateManyMutationInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   max_participants?: Prisma.IntFieldUpdateOperationsInput | number
+  cover_url?: Prisma.StringFieldUpdateOperationsInput | string
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  genres?: Prisma.roomsUpdategenresInput | string[]
+  queue_permission?: Prisma.StringFieldUpdateOperationsInput | string
+  skip_mode?: Prisma.StringFieldUpdateOperationsInput | string
+  vote_threshold?: Prisma.IntFieldUpdateOperationsInput | number
+  allow_chat?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -405,6 +531,13 @@ export type roomsUncheckedUpdateManyInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   max_participants?: Prisma.IntFieldUpdateOperationsInput | number
+  cover_url?: Prisma.StringFieldUpdateOperationsInput | string
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  genres?: Prisma.roomsUpdategenresInput | string[]
+  queue_permission?: Prisma.StringFieldUpdateOperationsInput | string
+  skip_mode?: Prisma.StringFieldUpdateOperationsInput | string
+  vote_threshold?: Prisma.IntFieldUpdateOperationsInput | number
+  allow_chat?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -414,6 +547,14 @@ export type RoomsScalarRelationFilter = {
   isNot?: Prisma.roomsWhereInput
 }
 
+export type StringNullableListFilter<$PrismaModel = never> = {
+  equals?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel> | null
+  has?: string | Prisma.StringFieldRefInput<$PrismaModel> | null
+  hasEvery?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  hasSome?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  isEmpty?: boolean
+}
+
 export type roomsCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   host_id?: Prisma.SortOrder
@@ -421,6 +562,13 @@ export type roomsCountOrderByAggregateInput = {
   description?: Prisma.SortOrder
   is_active?: Prisma.SortOrder
   max_participants?: Prisma.SortOrder
+  cover_url?: Prisma.SortOrder
+  is_public?: Prisma.SortOrder
+  genres?: Prisma.SortOrder
+  queue_permission?: Prisma.SortOrder
+  skip_mode?: Prisma.SortOrder
+  vote_threshold?: Prisma.SortOrder
+  allow_chat?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   closed_at?: Prisma.SortOrder
 }
@@ -429,6 +577,7 @@ export type roomsAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   host_id?: Prisma.SortOrder
   max_participants?: Prisma.SortOrder
+  vote_threshold?: Prisma.SortOrder
 }
 
 export type roomsMaxOrderByAggregateInput = {
@@ -438,6 +587,12 @@ export type roomsMaxOrderByAggregateInput = {
   description?: Prisma.SortOrder
   is_active?: Prisma.SortOrder
   max_participants?: Prisma.SortOrder
+  cover_url?: Prisma.SortOrder
+  is_public?: Prisma.SortOrder
+  queue_permission?: Prisma.SortOrder
+  skip_mode?: Prisma.SortOrder
+  vote_threshold?: Prisma.SortOrder
+  allow_chat?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   closed_at?: Prisma.SortOrder
 }
@@ -449,6 +604,12 @@ export type roomsMinOrderByAggregateInput = {
   description?: Prisma.SortOrder
   is_active?: Prisma.SortOrder
   max_participants?: Prisma.SortOrder
+  cover_url?: Prisma.SortOrder
+  is_public?: Prisma.SortOrder
+  queue_permission?: Prisma.SortOrder
+  skip_mode?: Prisma.SortOrder
+  vote_threshold?: Prisma.SortOrder
+  allow_chat?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   closed_at?: Prisma.SortOrder
 }
@@ -457,6 +618,7 @@ export type roomsSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   host_id?: Prisma.SortOrder
   max_participants?: Prisma.SortOrder
+  vote_threshold?: Prisma.SortOrder
 }
 
 export type RoomsListRelationFilter = {
@@ -525,6 +687,15 @@ export type roomsUpdateOneRequiredWithoutRoom_votesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.roomsUpdateToOneWithWhereWithoutRoom_votesInput, Prisma.roomsUpdateWithoutRoom_votesInput>, Prisma.roomsUncheckedUpdateWithoutRoom_votesInput>
 }
 
+export type roomsCreategenresInput = {
+  set: string[]
+}
+
+export type roomsUpdategenresInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
 export type roomsCreateNestedManyWithoutUsersInput = {
   create?: Prisma.XOR<Prisma.roomsCreateWithoutUsersInput, Prisma.roomsUncheckedCreateWithoutUsersInput> | Prisma.roomsCreateWithoutUsersInput[] | Prisma.roomsUncheckedCreateWithoutUsersInput[]
   connectOrCreate?: Prisma.roomsCreateOrConnectWithoutUsersInput | Prisma.roomsCreateOrConnectWithoutUsersInput[]
@@ -572,6 +743,13 @@ export type roomsCreateWithoutRoom_messagesInput = {
   description?: string
   is_active?: boolean
   max_participants: number
+  cover_url?: string
+  is_public?: boolean
+  genres?: Prisma.roomsCreategenresInput | string[]
+  queue_permission?: string
+  skip_mode?: string
+  vote_threshold?: number
+  allow_chat?: boolean
   created_at?: Date | string
   closed_at?: Date | string | null
   room_participants?: Prisma.room_participantsCreateNestedManyWithoutRoomsInput
@@ -587,6 +765,13 @@ export type roomsUncheckedCreateWithoutRoom_messagesInput = {
   description?: string
   is_active?: boolean
   max_participants: number
+  cover_url?: string
+  is_public?: boolean
+  genres?: Prisma.roomsCreategenresInput | string[]
+  queue_permission?: string
+  skip_mode?: string
+  vote_threshold?: number
+  allow_chat?: boolean
   created_at?: Date | string
   closed_at?: Date | string | null
   room_participants?: Prisma.room_participantsUncheckedCreateNestedManyWithoutRoomsInput
@@ -615,6 +800,13 @@ export type roomsUpdateWithoutRoom_messagesInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   max_participants?: Prisma.IntFieldUpdateOperationsInput | number
+  cover_url?: Prisma.StringFieldUpdateOperationsInput | string
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  genres?: Prisma.roomsUpdategenresInput | string[]
+  queue_permission?: Prisma.StringFieldUpdateOperationsInput | string
+  skip_mode?: Prisma.StringFieldUpdateOperationsInput | string
+  vote_threshold?: Prisma.IntFieldUpdateOperationsInput | number
+  allow_chat?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   room_participants?: Prisma.room_participantsUpdateManyWithoutRoomsNestedInput
@@ -630,6 +822,13 @@ export type roomsUncheckedUpdateWithoutRoom_messagesInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   max_participants?: Prisma.IntFieldUpdateOperationsInput | number
+  cover_url?: Prisma.StringFieldUpdateOperationsInput | string
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  genres?: Prisma.roomsUpdategenresInput | string[]
+  queue_permission?: Prisma.StringFieldUpdateOperationsInput | string
+  skip_mode?: Prisma.StringFieldUpdateOperationsInput | string
+  vote_threshold?: Prisma.IntFieldUpdateOperationsInput | number
+  allow_chat?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   room_participants?: Prisma.room_participantsUncheckedUpdateManyWithoutRoomsNestedInput
@@ -642,6 +841,13 @@ export type roomsCreateWithoutRoom_participantsInput = {
   description?: string
   is_active?: boolean
   max_participants: number
+  cover_url?: string
+  is_public?: boolean
+  genres?: Prisma.roomsCreategenresInput | string[]
+  queue_permission?: string
+  skip_mode?: string
+  vote_threshold?: number
+  allow_chat?: boolean
   created_at?: Date | string
   closed_at?: Date | string | null
   room_messages?: Prisma.room_messagesCreateNestedManyWithoutRoomsInput
@@ -657,6 +863,13 @@ export type roomsUncheckedCreateWithoutRoom_participantsInput = {
   description?: string
   is_active?: boolean
   max_participants: number
+  cover_url?: string
+  is_public?: boolean
+  genres?: Prisma.roomsCreategenresInput | string[]
+  queue_permission?: string
+  skip_mode?: string
+  vote_threshold?: number
+  allow_chat?: boolean
   created_at?: Date | string
   closed_at?: Date | string | null
   room_messages?: Prisma.room_messagesUncheckedCreateNestedManyWithoutRoomsInput
@@ -685,6 +898,13 @@ export type roomsUpdateWithoutRoom_participantsInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   max_participants?: Prisma.IntFieldUpdateOperationsInput | number
+  cover_url?: Prisma.StringFieldUpdateOperationsInput | string
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  genres?: Prisma.roomsUpdategenresInput | string[]
+  queue_permission?: Prisma.StringFieldUpdateOperationsInput | string
+  skip_mode?: Prisma.StringFieldUpdateOperationsInput | string
+  vote_threshold?: Prisma.IntFieldUpdateOperationsInput | number
+  allow_chat?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   room_messages?: Prisma.room_messagesUpdateManyWithoutRoomsNestedInput
@@ -700,6 +920,13 @@ export type roomsUncheckedUpdateWithoutRoom_participantsInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   max_participants?: Prisma.IntFieldUpdateOperationsInput | number
+  cover_url?: Prisma.StringFieldUpdateOperationsInput | string
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  genres?: Prisma.roomsUpdategenresInput | string[]
+  queue_permission?: Prisma.StringFieldUpdateOperationsInput | string
+  skip_mode?: Prisma.StringFieldUpdateOperationsInput | string
+  vote_threshold?: Prisma.IntFieldUpdateOperationsInput | number
+  allow_chat?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   room_messages?: Prisma.room_messagesUncheckedUpdateManyWithoutRoomsNestedInput
@@ -712,6 +939,13 @@ export type roomsCreateWithoutRoom_queueInput = {
   description?: string
   is_active?: boolean
   max_participants: number
+  cover_url?: string
+  is_public?: boolean
+  genres?: Prisma.roomsCreategenresInput | string[]
+  queue_permission?: string
+  skip_mode?: string
+  vote_threshold?: number
+  allow_chat?: boolean
   created_at?: Date | string
   closed_at?: Date | string | null
   room_messages?: Prisma.room_messagesCreateNestedManyWithoutRoomsInput
@@ -727,6 +961,13 @@ export type roomsUncheckedCreateWithoutRoom_queueInput = {
   description?: string
   is_active?: boolean
   max_participants: number
+  cover_url?: string
+  is_public?: boolean
+  genres?: Prisma.roomsCreategenresInput | string[]
+  queue_permission?: string
+  skip_mode?: string
+  vote_threshold?: number
+  allow_chat?: boolean
   created_at?: Date | string
   closed_at?: Date | string | null
   room_messages?: Prisma.room_messagesUncheckedCreateNestedManyWithoutRoomsInput
@@ -755,6 +996,13 @@ export type roomsUpdateWithoutRoom_queueInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   max_participants?: Prisma.IntFieldUpdateOperationsInput | number
+  cover_url?: Prisma.StringFieldUpdateOperationsInput | string
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  genres?: Prisma.roomsUpdategenresInput | string[]
+  queue_permission?: Prisma.StringFieldUpdateOperationsInput | string
+  skip_mode?: Prisma.StringFieldUpdateOperationsInput | string
+  vote_threshold?: Prisma.IntFieldUpdateOperationsInput | number
+  allow_chat?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   room_messages?: Prisma.room_messagesUpdateManyWithoutRoomsNestedInput
@@ -770,6 +1018,13 @@ export type roomsUncheckedUpdateWithoutRoom_queueInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   max_participants?: Prisma.IntFieldUpdateOperationsInput | number
+  cover_url?: Prisma.StringFieldUpdateOperationsInput | string
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  genres?: Prisma.roomsUpdategenresInput | string[]
+  queue_permission?: Prisma.StringFieldUpdateOperationsInput | string
+  skip_mode?: Prisma.StringFieldUpdateOperationsInput | string
+  vote_threshold?: Prisma.IntFieldUpdateOperationsInput | number
+  allow_chat?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   room_messages?: Prisma.room_messagesUncheckedUpdateManyWithoutRoomsNestedInput
@@ -782,6 +1037,13 @@ export type roomsCreateWithoutRoom_votesInput = {
   description?: string
   is_active?: boolean
   max_participants: number
+  cover_url?: string
+  is_public?: boolean
+  genres?: Prisma.roomsCreategenresInput | string[]
+  queue_permission?: string
+  skip_mode?: string
+  vote_threshold?: number
+  allow_chat?: boolean
   created_at?: Date | string
   closed_at?: Date | string | null
   room_messages?: Prisma.room_messagesCreateNestedManyWithoutRoomsInput
@@ -797,6 +1059,13 @@ export type roomsUncheckedCreateWithoutRoom_votesInput = {
   description?: string
   is_active?: boolean
   max_participants: number
+  cover_url?: string
+  is_public?: boolean
+  genres?: Prisma.roomsCreategenresInput | string[]
+  queue_permission?: string
+  skip_mode?: string
+  vote_threshold?: number
+  allow_chat?: boolean
   created_at?: Date | string
   closed_at?: Date | string | null
   room_messages?: Prisma.room_messagesUncheckedCreateNestedManyWithoutRoomsInput
@@ -825,6 +1094,13 @@ export type roomsUpdateWithoutRoom_votesInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   max_participants?: Prisma.IntFieldUpdateOperationsInput | number
+  cover_url?: Prisma.StringFieldUpdateOperationsInput | string
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  genres?: Prisma.roomsUpdategenresInput | string[]
+  queue_permission?: Prisma.StringFieldUpdateOperationsInput | string
+  skip_mode?: Prisma.StringFieldUpdateOperationsInput | string
+  vote_threshold?: Prisma.IntFieldUpdateOperationsInput | number
+  allow_chat?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   room_messages?: Prisma.room_messagesUpdateManyWithoutRoomsNestedInput
@@ -840,6 +1116,13 @@ export type roomsUncheckedUpdateWithoutRoom_votesInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   max_participants?: Prisma.IntFieldUpdateOperationsInput | number
+  cover_url?: Prisma.StringFieldUpdateOperationsInput | string
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  genres?: Prisma.roomsUpdategenresInput | string[]
+  queue_permission?: Prisma.StringFieldUpdateOperationsInput | string
+  skip_mode?: Prisma.StringFieldUpdateOperationsInput | string
+  vote_threshold?: Prisma.IntFieldUpdateOperationsInput | number
+  allow_chat?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   room_messages?: Prisma.room_messagesUncheckedUpdateManyWithoutRoomsNestedInput
@@ -852,6 +1135,13 @@ export type roomsCreateWithoutUsersInput = {
   description?: string
   is_active?: boolean
   max_participants: number
+  cover_url?: string
+  is_public?: boolean
+  genres?: Prisma.roomsCreategenresInput | string[]
+  queue_permission?: string
+  skip_mode?: string
+  vote_threshold?: number
+  allow_chat?: boolean
   created_at?: Date | string
   closed_at?: Date | string | null
   room_messages?: Prisma.room_messagesCreateNestedManyWithoutRoomsInput
@@ -866,6 +1156,13 @@ export type roomsUncheckedCreateWithoutUsersInput = {
   description?: string
   is_active?: boolean
   max_participants: number
+  cover_url?: string
+  is_public?: boolean
+  genres?: Prisma.roomsCreategenresInput | string[]
+  queue_permission?: string
+  skip_mode?: string
+  vote_threshold?: number
+  allow_chat?: boolean
   created_at?: Date | string
   closed_at?: Date | string | null
   room_messages?: Prisma.room_messagesUncheckedCreateNestedManyWithoutRoomsInput
@@ -910,6 +1207,13 @@ export type roomsScalarWhereInput = {
   description?: Prisma.StringFilter<"rooms"> | string
   is_active?: Prisma.BoolFilter<"rooms"> | boolean
   max_participants?: Prisma.IntFilter<"rooms"> | number
+  cover_url?: Prisma.StringFilter<"rooms"> | string
+  is_public?: Prisma.BoolFilter<"rooms"> | boolean
+  genres?: Prisma.StringNullableListFilter<"rooms">
+  queue_permission?: Prisma.StringFilter<"rooms"> | string
+  skip_mode?: Prisma.StringFilter<"rooms"> | string
+  vote_threshold?: Prisma.IntFilter<"rooms"> | number
+  allow_chat?: Prisma.BoolFilter<"rooms"> | boolean
   created_at?: Prisma.DateTimeFilter<"rooms"> | Date | string
   closed_at?: Prisma.DateTimeNullableFilter<"rooms"> | Date | string | null
 }
@@ -920,6 +1224,13 @@ export type roomsCreateManyUsersInput = {
   description?: string
   is_active?: boolean
   max_participants: number
+  cover_url?: string
+  is_public?: boolean
+  genres?: Prisma.roomsCreategenresInput | string[]
+  queue_permission?: string
+  skip_mode?: string
+  vote_threshold?: number
+  allow_chat?: boolean
   created_at?: Date | string
   closed_at?: Date | string | null
 }
@@ -929,6 +1240,13 @@ export type roomsUpdateWithoutUsersInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   max_participants?: Prisma.IntFieldUpdateOperationsInput | number
+  cover_url?: Prisma.StringFieldUpdateOperationsInput | string
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  genres?: Prisma.roomsUpdategenresInput | string[]
+  queue_permission?: Prisma.StringFieldUpdateOperationsInput | string
+  skip_mode?: Prisma.StringFieldUpdateOperationsInput | string
+  vote_threshold?: Prisma.IntFieldUpdateOperationsInput | number
+  allow_chat?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   room_messages?: Prisma.room_messagesUpdateManyWithoutRoomsNestedInput
@@ -943,6 +1261,13 @@ export type roomsUncheckedUpdateWithoutUsersInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   max_participants?: Prisma.IntFieldUpdateOperationsInput | number
+  cover_url?: Prisma.StringFieldUpdateOperationsInput | string
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  genres?: Prisma.roomsUpdategenresInput | string[]
+  queue_permission?: Prisma.StringFieldUpdateOperationsInput | string
+  skip_mode?: Prisma.StringFieldUpdateOperationsInput | string
+  vote_threshold?: Prisma.IntFieldUpdateOperationsInput | number
+  allow_chat?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   room_messages?: Prisma.room_messagesUncheckedUpdateManyWithoutRoomsNestedInput
@@ -957,6 +1282,13 @@ export type roomsUncheckedUpdateManyWithoutUsersInput = {
   description?: Prisma.StringFieldUpdateOperationsInput | string
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   max_participants?: Prisma.IntFieldUpdateOperationsInput | number
+  cover_url?: Prisma.StringFieldUpdateOperationsInput | string
+  is_public?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  genres?: Prisma.roomsUpdategenresInput | string[]
+  queue_permission?: Prisma.StringFieldUpdateOperationsInput | string
+  skip_mode?: Prisma.StringFieldUpdateOperationsInput | string
+  vote_threshold?: Prisma.IntFieldUpdateOperationsInput | number
+  allow_chat?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -1026,6 +1358,13 @@ export type roomsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   description?: boolean
   is_active?: boolean
   max_participants?: boolean
+  cover_url?: boolean
+  is_public?: boolean
+  genres?: boolean
+  queue_permission?: boolean
+  skip_mode?: boolean
+  vote_threshold?: boolean
+  allow_chat?: boolean
   created_at?: boolean
   closed_at?: boolean
   room_messages?: boolean | Prisma.rooms$room_messagesArgs<ExtArgs>
@@ -1043,6 +1382,13 @@ export type roomsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   description?: boolean
   is_active?: boolean
   max_participants?: boolean
+  cover_url?: boolean
+  is_public?: boolean
+  genres?: boolean
+  queue_permission?: boolean
+  skip_mode?: boolean
+  vote_threshold?: boolean
+  allow_chat?: boolean
   created_at?: boolean
   closed_at?: boolean
   users?: boolean | Prisma.usersDefaultArgs<ExtArgs>
@@ -1055,6 +1401,13 @@ export type roomsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   description?: boolean
   is_active?: boolean
   max_participants?: boolean
+  cover_url?: boolean
+  is_public?: boolean
+  genres?: boolean
+  queue_permission?: boolean
+  skip_mode?: boolean
+  vote_threshold?: boolean
+  allow_chat?: boolean
   created_at?: boolean
   closed_at?: boolean
   users?: boolean | Prisma.usersDefaultArgs<ExtArgs>
@@ -1067,11 +1420,18 @@ export type roomsSelectScalar = {
   description?: boolean
   is_active?: boolean
   max_participants?: boolean
+  cover_url?: boolean
+  is_public?: boolean
+  genres?: boolean
+  queue_permission?: boolean
+  skip_mode?: boolean
+  vote_threshold?: boolean
+  allow_chat?: boolean
   created_at?: boolean
   closed_at?: boolean
 }
 
-export type roomsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "host_id" | "title" | "description" | "is_active" | "max_participants" | "created_at" | "closed_at", ExtArgs["result"]["rooms"]>
+export type roomsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "host_id" | "title" | "description" | "is_active" | "max_participants" | "cover_url" | "is_public" | "genres" | "queue_permission" | "skip_mode" | "vote_threshold" | "allow_chat" | "created_at" | "closed_at", ExtArgs["result"]["rooms"]>
 export type roomsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   room_messages?: boolean | Prisma.rooms$room_messagesArgs<ExtArgs>
   room_participants?: boolean | Prisma.rooms$room_participantsArgs<ExtArgs>
@@ -1103,6 +1463,13 @@ export type $roomsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     description: string
     is_active: boolean
     max_participants: number
+    cover_url: string
+    is_public: boolean
+    genres: string[]
+    queue_permission: string
+    skip_mode: string
+    vote_threshold: number
+    allow_chat: boolean
     created_at: Date
     closed_at: Date | null
   }, ExtArgs["result"]["rooms"]>
@@ -1539,6 +1906,13 @@ export interface roomsFieldRefs {
   readonly description: Prisma.FieldRef<"rooms", 'String'>
   readonly is_active: Prisma.FieldRef<"rooms", 'Boolean'>
   readonly max_participants: Prisma.FieldRef<"rooms", 'Int'>
+  readonly cover_url: Prisma.FieldRef<"rooms", 'String'>
+  readonly is_public: Prisma.FieldRef<"rooms", 'Boolean'>
+  readonly genres: Prisma.FieldRef<"rooms", 'String[]'>
+  readonly queue_permission: Prisma.FieldRef<"rooms", 'String'>
+  readonly skip_mode: Prisma.FieldRef<"rooms", 'String'>
+  readonly vote_threshold: Prisma.FieldRef<"rooms", 'Int'>
+  readonly allow_chat: Prisma.FieldRef<"rooms", 'Boolean'>
   readonly created_at: Prisma.FieldRef<"rooms", 'DateTime'>
   readonly closed_at: Prisma.FieldRef<"rooms", 'DateTime'>
 }

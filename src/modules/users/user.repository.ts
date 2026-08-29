@@ -102,4 +102,68 @@ export class UserRepository {
 
     return result.count;
   }
+
+  async getRelationship(userId: number, otherUserId: number) {
+    const [following, followedBy] = await Promise.all([
+      db.user_follows.findUnique({
+        where: {
+          follower_id_following_id: { follower_id: userId, following_id: otherUserId },
+        },
+        select: { follower_id: true },
+      }),
+      db.user_follows.findUnique({
+        where: {
+          follower_id_following_id: { follower_id: otherUserId, following_id: userId },
+        },
+        select: { follower_id: true },
+      }),
+    ]);
+
+    return {
+      isFollowing: !!following,
+      isFollowedBy: !!followedBy,
+    };
+  }
+  async findFriends(userId: number, page: number, limit: number) {
+    const offset = (page - 1) * limit;
+
+    // Друзі = користувачі, на яких я підписаний І які підписані на мене
+    const where = {
+      AND: [
+        // я підписаний на них
+        {
+          user_follows_user_follows_follower_idTousers: {
+            some: { following_id: userId },
+          },
+        },
+        // вони підписані на мене
+        {
+          user_follows_user_follows_following_idTousers: {
+            some: { follower_id: userId },
+          },
+        },
+      ],
+    };
+
+    const [data, total] = await Promise.all([
+      db.users.findMany({
+        where,
+        select: {
+          id: true,
+          username: true,
+          avatar_url: true,
+          bio: true,
+          role: true,
+          is_verified: true,
+          created_at: true,
+        },
+        skip: offset,
+        take: limit,
+        orderBy: { username: "asc" },
+      }),
+      db.users.count({ where }),
+    ]);
+
+    return { data, total };
+  }
 }

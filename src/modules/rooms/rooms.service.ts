@@ -3,6 +3,10 @@ import { ProblemDocument } from "../../models/error.model.ts";
 import { roomsRepository } from "./rooms.repository.ts";
 import { CreateRoomInput, QueueTrackInput, UpdateRoomInput, VoteInput } from "./rooms.schema.ts";
 import type { WebSocket } from "@fastify/websocket";
+import { IMAGE_FOLDERS, uploadCover } from "../../utils/storage.utils.ts";
+import { UploadDataType } from "../../types/upload.types.ts";
+
+const DEFAULT_ROOM_COVER = "default_room_cover.png";
 
 const CHANNEL_PREFIX = "room:";
 
@@ -49,8 +53,11 @@ class RoomHub {
 export const roomHub = new RoomHub();
 
 export const roomsService = {
-  async createRoom(hostId: number, data: CreateRoomInput) {
-    return roomsRepository.create(hostId, data);
+  async createRoom(hostId: number, data: CreateRoomInput, coverData: UploadDataType | null) {
+    const coverUrl = coverData
+      ? await uploadCover(coverData, IMAGE_FOLDERS.roomCovers)
+      : DEFAULT_ROOM_COVER;
+    return roomsRepository.create(hostId, { ...data, cover_url: coverUrl });
   },
 
   async getRoomOrThrow(roomId: number) {

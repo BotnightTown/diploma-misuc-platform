@@ -16,15 +16,19 @@ import {
   listRoomsQuerySchema,
   roomIdParamSchema,
 } from "./rooms.schema.ts";
-import { parseBody } from "../../utils/controller.utils.ts";
+import { parseBody, parseMultipartFormData } from "../../utils/controller.utils.ts";
 
 type RoomParams = { Params: { roomId: string } };
 
 export const roomsController = {
   async createRoom(req: FastifyRequest, reply: FastifyReply) {
     const userId = req.user.sub;
-    const body = parseBody(createRoomSchema, req.body);
-    const room = await roomsService.createRoom(userId, body);
+    const { fields, files } = await parseMultipartFormData(req.body as Record<string, any>);
+
+    const body = parseBody(createRoomSchema, fields);
+    const coverData = files.cover ?? null;
+
+    const room = await roomsService.createRoom(userId, body, coverData);
     return reply
       .code(201)
       .send(createHateoasResponse(room, roomLinks(room.id, room.host_id, userId)));

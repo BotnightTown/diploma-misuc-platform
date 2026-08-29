@@ -9,7 +9,7 @@ import { UploadDataType } from "../types/upload.types.ts";
 
 export type StorageBucket = "tracks" | "images";
 export type ImageFolder =
-  "avatars/users" | "avatars/artists" | "covers/albums" | "covers/playlists";
+  "avatars/users" | "avatars/artists" | "covers/albums" | "covers/playlists" | "covers/rooms";
 
 const BUCKET_MAP: Record<StorageBucket, string> = {
   tracks: env.MINIO_BUCKET_TRACKS,
@@ -21,6 +21,7 @@ export const IMAGE_FOLDERS = {
   artistAvatars: "avatars/artists",
   albumCovers: "covers/albums",
   playlistCovers: "covers/playlists",
+  roomCovers: "covers/rooms",
 } as const satisfies Record<string, ImageFolder>;
 
 function joinStoragePath(...parts: string[]): string {

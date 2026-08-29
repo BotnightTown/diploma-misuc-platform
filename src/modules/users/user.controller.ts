@@ -7,11 +7,15 @@ import {
   ChangePasswordType,
   followSchema,
   FollowType,
+  friendsQuerySchema,
+  FriendsQueryType,
   paginationSchema,
   updateBioSchema,
   UpdateBioType,
   updateUsernameSchema,
   UpdateUsernameType,
+  userRelationshipParamsSchema,
+  UserRelationshipParamsType,
 } from "./user.schema.ts";
 import {
   isMultipartRequest,
@@ -189,5 +193,27 @@ export class UserController {
 
     await this.service.unfollowUser(userId, data.followingId);
     return reply.status(204).send();
+  }
+
+  async getRelationship(
+    request: FastifyRequest<{ Params: UserRelationshipParamsType }>,
+    reply: FastifyReply,
+  ) {
+    const { userId, otherUserId } = parseBody(userRelationshipParamsSchema, request.params);
+    const relationship = await this.service.getRelationship(userId, otherUserId);
+    return reply.status(200).send(createHateoasResponse(relationship, userProfileLinks(userId)));
+  }
+
+  async getFriends(
+    request: FastifyRequest<{ Params: { userId: number }; Querystring: FriendsQueryType }>,
+    reply: FastifyReply,
+  ) {
+    const userId = parseUserId(request.params.userId);
+    const query = parseBody(friendsQuerySchema, request.query);
+
+    const { data, pagination } = await this.service.getFriends(userId, query);
+    return reply
+      .status(200)
+      .send(createHateoasResponse(data, userProfileLinks(userId), pagination));
   }
 }

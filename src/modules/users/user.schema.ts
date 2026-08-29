@@ -36,8 +36,19 @@ export const paginationSchema = z.object({
   limit: z.coerce.number().int().positive().max(100).default(20),
 });
 
+export const userRelationshipParamsSchema = z.object({
+  userId: z.coerce.number().int().positive(),
+  otherUserId: z.coerce.number().int().positive(),
+});
+export const friendsQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(100).default(20),
+});
+
 export type UpdateUsernameType = z.infer<typeof updateUsernameSchema>;
 export type UpdateBioType = z.infer<typeof updateBioSchema>;
 export type ChangePasswordType = z.infer<typeof changePasswordSchema>;
 export type ChangeEmailType = z.infer<typeof changeEmailSchema>;
 export type FollowType = z.infer<typeof followSchema>;
+export type UserRelationshipParamsType = z.infer<typeof userRelationshipParamsSchema>;
+export type FriendsQueryType = z.infer<typeof friendsQuerySchema>;

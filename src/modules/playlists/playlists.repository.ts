@@ -5,7 +5,7 @@ export class PlaylistRepository {
   async findAll(page: number, limit: number) {
     const offset = (page - 1) * limit;
     const where = { is_public: true };
-    const [playlists, total] = await Promise.all([
+    const [data, total] = await Promise.all([
       db.playlists.findMany({
         where,
         skip: offset,
@@ -15,7 +15,7 @@ export class PlaylistRepository {
       }),
       db.playlists.count({ where }),
     ]);
-    return { playlists, total };
+    return { data, total };
   }
 
   async findByUserId(userId: number, page: number, limit: number, onlyPublic: boolean) {

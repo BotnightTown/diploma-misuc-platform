@@ -2,13 +2,20 @@ import { db } from "../../config/db.ts";
 import { CreateRoomInput, UpdateRoomInput } from "./rooms.schema.ts";
 
 export const roomsRepository = {
-  create(hostId: number, data: CreateRoomInput) {
+  create(hostId: number, data: CreateRoomInput & { cover_url: string }) {
     return db.rooms.create({
       data: {
         host_id: hostId,
         title: data.title,
         description: data.description ?? "",
         max_participants: data.max_participants,
+        cover_url: data.cover_url,
+        is_public: data.is_public,
+        genres: data.genres,
+        queue_permission: data.queue_permission,
+        skip_mode: data.skip_mode,
+        vote_threshold: data.vote_threshold,
+        allow_chat: data.allow_chat,
         room_participants: {
           create: { user_id: hostId, role: "host" },
         },

@@ -196,6 +196,13 @@ model rooms {
   description       String              @default("")
   is_active         Boolean             @default(true)
   max_participants  Int
+  cover_url         String              @default("default_room_cover.png")
+  is_public         Boolean             @default(true)
+  genres            String[]            @default([])
+  queue_permission  String              @default("everyone")
+  skip_mode         String              @default("vote")
+  vote_threshold    Int                 @default(60)
+  allow_chat        Boolean             @default(true)
   created_at        DateTime            @default(now()) @db.Timestamptz(6)
   closed_at         DateTime?           @db.Timestamptz(6)
   room_messages     room_messages[]

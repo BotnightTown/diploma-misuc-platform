@@ -2110,6 +2110,13 @@ export const RoomsScalarFieldEnum = {
   description: 'description',
   is_active: 'is_active',
   max_participants: 'max_participants',
+  cover_url: 'cover_url',
+  is_public: 'is_public',
+  genres: 'genres',
+  queue_permission: 'queue_permission',
+  skip_mode: 'skip_mode',
+  vote_threshold: 'vote_threshold',
+  allow_chat: 'allow_chat',
   created_at: 'created_at',
   closed_at: 'closed_at'
 } as const

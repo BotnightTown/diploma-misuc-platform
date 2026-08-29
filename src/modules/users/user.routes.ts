@@ -57,4 +57,9 @@ export const userRoutes = async (fastify: FastifyInstance) => {
     { preHandler: authorizeSelf },
     controller.unfollowUser.bind(controller),
   );
+  fastify.get(
+    "/users/:userId/relationship/:otherUserId",
+    controller.getRelationship.bind(controller),
+  );
+  fastify.get("/users/:userId/friends", controller.getFriends.bind(controller));
 };

@@ -6,6 +6,7 @@ import {
   ChangePasswordType,
   UpdateUsernameType,
   UpdateBioType,
+  FriendsQueryType,
 } from "./user.schema.ts";
 import { ProblemDocument } from "../../models/error.model.ts";
 import {
@@ -202,5 +203,46 @@ export class UserService {
     if (!deletedCount) {
       throw new ProblemDocument(409, "Conflict", "You are not following this user");
     }
+  }
+
+  async getRelationship(userId: number, otherUserId: number) {
+    if (userId === otherUserId) {
+      throw new ProblemDocument(400, "Bad Request", "Cannot check relationship with yourself");
+    }
+
+    const [user, otherUser] = await Promise.all([
+      this.repository.findById(userId),
+      this.repository.findById(otherUserId),
+    ]);
+
+    if (!user || !otherUser) {
+      throw new ProblemDocument(404, "User Not Found", "One or both users do not exist");
+    }
+
+    const { isFollowing, isFollowedBy } = await this.repository.getRelationship(
+      userId,
+      otherUserId,
+    );
+
+    return {
+      isFollowing,
+      isFollowedBy,
+      areFriends: isFollowing && isFollowedBy,
+    };
+  }
+
+  async getFriends(userId: number, query: FriendsQueryType) {
+    const user = await this.repository.findById(userId);
+    if (!user) {
+      throw new ProblemDocument(404, "User Not Found", `User with ID ${userId} does not exist`);
+    }
+
+    const { page, limit } = query;
+    const { data, total } = await this.repository.findFriends(userId, page, limit);
+
+    return {
+      data,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    };
   }
 }

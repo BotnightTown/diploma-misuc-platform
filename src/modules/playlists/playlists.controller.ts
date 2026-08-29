@@ -25,8 +25,8 @@ export class PlaylistController {
 
   async getAll(request: FastifyRequest<{ Querystring: PlaylistsQueryType }>, reply: FastifyReply) {
     const query = parseBody(playlistsQuerySchema, request.query);
-    const result = await this.service.getAll(query);
-    return reply.status(200).send(createHateoasResponse(result, playlistListLinks()));
+    const { data, pagination } = await this.service.getAll(query);
+    return reply.status(200).send(createHateoasResponse(data, playlistListLinks(), pagination));
   }
 
   async getByUserId(
@@ -54,8 +54,10 @@ export class PlaylistController {
     const playlistId = parseUserId(request.params.playlistId);
     const query = parseBody(playlistsQuerySchema, request.query);
     const requesterId = request.user?.sub ?? null;
-    const result = await this.service.getTracks(playlistId, query, requesterId);
-    return reply.status(200).send(createHateoasResponse(result, playlistLinks(playlistId)));
+    const { data, pagination } = await this.service.getTracks(playlistId, query, requesterId);
+    return reply
+      .status(200)
+      .send(createHateoasResponse(data, playlistLinks(playlistId), pagination));
   }
 
   async create(request: FastifyRequest, reply: FastifyReply) {

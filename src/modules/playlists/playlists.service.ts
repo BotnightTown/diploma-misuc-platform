@@ -21,8 +21,8 @@ export class PlaylistService {
 
   async getAll(query: PlaylistsQueryType) {
     const { page, limit } = query;
-    const { playlists, total } = await this.repository.findAll(page, limit);
-    return { playlists, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } };
+    const { data, total } = await this.repository.findAll(page, limit);
+    return { data, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } };
   }
 
   async getByUserId(userId: number, query: PlaylistsQueryType, requesterId: number | null) {
@@ -59,11 +59,11 @@ export class PlaylistService {
   }
 
   async getTracks(playlistId: number, query: PlaylistsQueryType, requesterId: number | null) {
-    await this.getById(playlistId, requesterId); // існування + приватність
+    await this.getById(playlistId, requesterId);
     const { page, limit } = query;
     const { playlistTracks, total } = await this.repository.findTracks(playlistId, page, limit);
     return {
-      tracks: playlistTracks.map((pt) => ({
+      data: playlistTracks.map((pt) => ({
         ...pt.tracks,
         position: pt.position,
         added_at: pt.added_at,
